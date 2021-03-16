@@ -46,7 +46,16 @@ Dialog is pretty boring by itself. Use the following commandline options to spru
                         optionally pass in URL of file resource   -  "https://someurl/file.[png.jpg]"
                         if not specified, default icon will be used
                         Images from either file or URL are displayed as roundrect if no transparency
-    
+   
+    --overlayicon       Set an image to display as an overlay to --icon
+                        image is displayed at 1/2 resolution to the main image and positioned to the bottom right
+
+    --infoicon          Built in. Displays person with questionmark as the icon
+
+    --cautionicon       Built in. Displays yellow triangle with exclamation point
+
+    --warningicon       Built in. Displays red octagon with exclamation point
+            
     --hideicon          hides the icon from view
                         Doing so increases the space available for message text to approximately 100 words
 
