@@ -25,9 +25,8 @@ struct DialogView: View {
                 if (!appvars.iconIsHidden) {
                     VStack {
                             IconView()
-                            
                     }.frame(width: iconFrameWidth, height: iconFrameHeight, alignment: .top)
-                    .offset(x: -45, y: 10) //position the icon area
+                    .offset(x: -40)
                 }
                 
                 VStack(alignment: .center) {
