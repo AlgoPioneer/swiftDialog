@@ -1,4 +1,3 @@
-[![swiftui-version](https://img.shields.io/badge/swiftui-2.0-brightgreen)](https://developer.apple.com/documentation/swiftui) ![macos-version](https://img.shields.io/badge/macOS-11+-blue) [![xcode-version](https://img.shields.io/badge/xcode-12.5.1-red)](https://developer.apple.com/xcode/)
 
 # Dialog
 
@@ -10,7 +9,7 @@ Latest version can be found on the [Releases](https://github.com/bartreardon/Dia
 
 More info in the [Wiki](https://github.com/bartreardon/Dialog-public/wiki)
 
-![Dialog Logo](https://user-images.githubusercontent.com/3598965/125153263-d1baf780-e195-11eb-92ee-9321aa848ffc.png)
+![Dialog Logo](/assets/screen1.png)
 
 
 # Features
