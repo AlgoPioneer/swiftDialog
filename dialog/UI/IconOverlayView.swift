@@ -9,6 +9,8 @@ import Foundation
 import SwiftUI
 
 struct IconOverlayView: View {
+    //var overlayWidth: CGFloat = .infinity//= appvars.imageWidth * appvars.overlayIconScale
+    //var overlayHeight: CGFloat = .infinity //= appvars.imageHeight * appvars.overlayIconScale
     
     let overlayImagePath: String = CLOptionText(OptionName: CLOptions.overlayIconOption)
     var imgFromURL: Bool = false
@@ -31,7 +33,10 @@ struct IconOverlayView: View {
     
     var sfGradientPresent: Bool = false
         
+    //init(overlayIconWidth: CGFloat? = nil, overlayIconHeight: CGFloat? = nil) {
     init() {
+        //self.overlayWidth = overlayIconWidth ?? appvars.imageWidth * appvars.overlayIconScale
+        //self.overlayHeight = overlayIconHeight ?? appvars.imageHeight * appvars.overlayIconScale
         
         if overlayImagePath.starts(with: "http") {
             imgFromURL = true
@@ -41,6 +46,7 @@ struct IconOverlayView: View {
         }
         
         if overlayImagePath.hasPrefix("SF=") {
+            //print("sf present")
             sfSymbolPresent = true
             builtInIconPresent = true
             
@@ -50,17 +56,15 @@ struct IconOverlayView: View {
             for value in SFValues {
                 // split by =
                 let item = value.components(separatedBy: "=")
-                let itemName = item[0]
-                let itemValue = item[1]
 
-                if itemName == "SF" {
-                    builtInIconName = itemValue
+                if item[0] == "SF" {
+                    builtInIconName = item[1]
                 }
-                if itemName == "weight" {
+                if item[0] == "weight" {
                     builtInIconWeight = textToFontWeight(item[1])
                 }
-                if itemName.hasPrefix("colour") || itemName.hasPrefix("color") {
-                    if itemValue == "auto" {
+                if item[0].hasPrefix("colour") || item[0].hasPrefix("color") {
+                    if item[1] == "auto" {
                         // detecting sf symbol properties seems to be annoying, at least in swiftui 2
                         // this is a bit of a workaround in that we let the user determine if they want the multicolour SF symbol
                         // or a standard template style. sefault is template. "auto" will use the built in SF Symbol colours
@@ -69,12 +73,15 @@ struct IconOverlayView: View {
                         
                         iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
                                                 
-                        if itemName.hasSuffix("2") {
+                        if item[0].hasSuffix("2") {
                             sfGradientPresent = true
-                            builtInIconSecondaryColour = stringToColour(itemValue)
+                            builtInIconSecondaryColour = stringToColour(item[1])
                         } else {
-                            builtInIconColour = stringToColour(itemValue)
+                            builtInIconColour = stringToColour(item[1])
                         }
+                    //} else {
+                        //quitDialog(exitCode: 14, exitMessage: "Hex value for colour is not valid: \(item[1])")
+                        //print("Hex value for colour is not valid: \(item[1])")
                     }
                 } else {
                    iconRenderingMode = Image.TemplateRenderingMode.template
@@ -90,8 +97,8 @@ struct IconOverlayView: View {
         }
         if overlayImagePath == "caution" {
             builtInIconName = "exclamationmark.triangle.fill"
-            //builtInIconFill = "triangle.fill"
-            //builtInIconColour = Color.yellow
+            builtInIconFill = "triangle.fill"
+            builtInIconColour = Color.yellow
             builtInIconPresent = true
         }
         if overlayImagePath == "info" {
@@ -105,18 +112,19 @@ struct IconOverlayView: View {
             ZStack {
                 if builtInIconPresent {
                     ZStack {
-                        if sfSymbolPresent {
-                            //background square so the SF Symbol has something to render against
-                            Image(systemName: "square.fill")
-                                .resizable()
-                                .foregroundColor(.background)
-                                .font(Font.title.weight(Font.Weight.thin))
-                                .opacity(0.90)
-                                .shadow(color: .secondaryBackground.opacity(0.50), radius: 4, x:2, y:2) // gives the sf background some pop especially in dark mode
-                        }
+                        //background square so the SF Symbol "pops"
+                        Image(systemName: "square.fill")
+                            .resizable()
+                            .foregroundColor(.background)
+                            //.frame(width: overlayWidth, height: overlayWidth)
+                            .font(Font.title.weight(Font.Weight.thin))
+                            .opacity(0.90)
+                            .shadow(color: .primary, radius: 1, x: 1, y: 1)
+
                         ZStack() {
                             if sfGradientPresent {
                                 LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
+                                //LinearGradient(gradient: Gradient(colors: [.clear, .clear]), startPoint: .top, endPoint: .bottom)
                                     .mask(
                                     Image(systemName: builtInIconName)
                                         .renderingMode(iconRenderingMode)
@@ -128,14 +136,16 @@ struct IconOverlayView: View {
                             } else {
                                 // background colour
                                 ZStack {
-                                    // first image required to render as background fill (hopefully this is fixed in later versions of sf symbols, e.g. caution symbol
+                                    
                                     Image(systemName: builtInIconFill)
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
                                         .scaledToFit()
                                         .foregroundColor(Color.white)
                                         .font(Font.title.weight(builtInIconWeight))
-
+                                //}
+                                //forground image
+                                //ZStack {
                                     Image(systemName: builtInIconName)
                                         .renderingMode(iconRenderingMode)
                                         .resizable()
@@ -147,14 +157,17 @@ struct IconOverlayView: View {
                             }
                         }
                         .scaleEffect(0.8)
+                        //.frame(width: overlayWidth*0.8, height: overlayWidth*0.8)
+                        //.shadow(color: stringToColour("#FFEEFF"), radius: 6, x: 1, y: 1)
                     }
                     .aspectRatio(1, contentMode: .fit)
                 } else if imgFromAPP {
+                    //Image(nsImage: getAppIcon(appPath: overlayImagePath, withSize: overlayWidth))
                     Image(nsImage: getAppIcon(appPath: overlayImagePath))
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaledToFit()
-                } else {
+                } else { //if FileManager.default.fileExists(atPath: overlayImagePath) {
                     let diskImage: NSImage = getImageFromPath(fileImagePath: overlayImagePath, imgWidth: appvars.imageWidth, imgHeight: appvars.imageHeight, returnErrorImage: false)
                     Image(nsImage: diskImage)
                         .resizable()
@@ -162,8 +175,12 @@ struct IconOverlayView: View {
                         .scaledToFit()
                         .clipShape(RoundedRectangle(cornerRadius: 5))
                 }
+                
             }
+            //.frame(width: overlayWidth, height: overlayHeight)
+            //.offset(x: appvars.overlayOffsetX, y: appvars.overlayOffsetY)
             .shadow(color: Color.primary.opacity(0.70), radius: appvars.overlayShadow)
+            //.border(Color.red)
         }
     }
 }
