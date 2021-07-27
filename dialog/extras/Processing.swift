@@ -130,46 +130,25 @@ func getVersionString() -> String {
 }
 
 func quitDialog(exitCode: Int32, exitMessage: String? = "") {
-    //var userOutput: Bool = false
-    
     if exitMessage != "" {
         //print(exitCode)
         print("\(exitMessage!)")
     }
-        
     // only print if exit code os 0
-    if exitCode == 0 {
+    if exitCode == 0 && appvars.selectedOption != "" {
         
-        //build output array
-        var outputArray : Array = [String]()
-        if appvars.selectedOption != "" {
-            outputArray.append("\"SelectedOption\" : \"\(appvars.selectedOption)\"")
-        }
-        if appvars.selectedIndex > 0 {
-            outputArray.append("\"SelectedIndex\" : \(appvars.selectedIndex)")
-        }
-        if CLOptionPresent(OptionName: CLOptions.textField) {
-            for i in 0..<appvars.textOptionsArray.count {
-                outputArray.append("\"\(appvars.textOptionsArray[i])\" : \"\(appvars.textFieldText[i])\"")
-            }
-        }
-        
-        // print the output
         if appvars.jsonOut {
-            var newElementChar = ","
             print("{")
-            for i in 0..<outputArray.count {
-                if i == (outputArray.count - 1) {
-                    newElementChar = ""
-                }
-                print(outputArray[i]+newElementChar)
-            }
+            print("\"SelectedOption\" : \"\(appvars.selectedOption)\",")
+            print("\"SelectedIndex\" : \(appvars.selectedIndex)")
             print("}")
         } else  {
-            for i in 0..<outputArray.count {
-                print(outputArray[i].replacingOccurrences(of: "\"", with: ""))
-            }
+            print("SelectedOption: \(appvars.selectedOption)")
+            print("SelectedIndex: \(appvars.selectedIndex)")
         }
+        //if CLOptionPresent(OptionName: CLOptions.dropdownDefault) || appvars.selectedIndex >= 0 {
+        //    print("SelectedIndex: \(appvars.selectedIndex)")
+        //}
     }
     exit(exitCode)
 }
