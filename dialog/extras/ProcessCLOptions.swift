@@ -63,6 +63,16 @@ func processCLOptions() {
         appvars.windowHeight = NumberFormatter().number(from: cloptions.windowHeight.value) as! CGFloat
     }
     
+    if cloptions.iconSize.present {
+        //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: cloptions.windowWidth)
+        appvars.imageWidth = NumberFormatter().number(from: cloptions.iconSize.value) as! CGFloat
+    }
+    /*
+    if cloptions.iconHeight.present {
+        //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: cloptions.windowHeight)
+        appvars.imageHeight = NumberFormatter().number(from: cloptions.iconHeight.value) as! CGFloat
+    }
+    */
     // Correct feng shui so the app accepts keyboard input
     // from https://stackoverflow.com/questions/58872398/what-is-the-minimally-viable-gui-for-command-line-swift-scripts
     let app = NSApplication.shared
@@ -182,6 +192,12 @@ func processCLOptionValues() {
 
     cloptions.iconOption.value              = CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
     cloptions.iconOption.present            = CLOptionPresent(OptionName: cloptions.iconOption)
+    
+    cloptions.iconSize.value                = CLOptionText(OptionName: cloptions.iconSize)
+    cloptions.iconSize.present              = CLOptionPresent(OptionName: cloptions.iconSize)
+    
+    //cloptions.iconHeight.value              = CLOptionText(OptionName: cloptions.iconHeight)
+    //cloptions.iconHeight.present            = CLOptionPresent(OptionName: cloptions.iconHeight)
 
     cloptions.overlayIconOption.value       = CLOptionText(OptionName: cloptions.overlayIconOption)
     cloptions.overlayIconOption.present     = CLOptionPresent(OptionName: cloptions.overlayIconOption)
@@ -230,7 +246,7 @@ func processCLOptionValues() {
 
     cloptions.mainImage.value               = CLOptionText(OptionName: cloptions.mainImage)
     cloptions.mainImage.present             = CLOptionPresent(OptionName: cloptions.mainImage)
-    
+
     cloptions.mainImageCaption.value        = CLOptionText(OptionName: cloptions.mainImageCaption)
     cloptions.mainImageCaption.present      = CLOptionPresent(OptionName: cloptions.mainImageCaption)
 
@@ -242,7 +258,7 @@ func processCLOptionValues() {
     
     cloptions.watermarkImage.value          = CLOptionText(OptionName: cloptions.watermarkImage)
     cloptions.watermarkImage.present        = CLOptionPresent(OptionName: cloptions.watermarkImage)
-        
+    
     cloptions.watermarkAlpha.value          = CLOptionText(OptionName: cloptions.watermarkAlpha)
     cloptions.watermarkAlpha.present        = CLOptionPresent(OptionName: cloptions.watermarkAlpha)
     
@@ -252,27 +268,6 @@ func processCLOptionValues() {
     cloptions.watermarkFill.value           = CLOptionText(OptionName: cloptions.watermarkFill)
     cloptions.watermarkFill.present         = CLOptionPresent(OptionName: cloptions.watermarkFill)
 
-    if cloptions.watermarkImage.present {
-        // return the image resolution and re-size the window to match
-        let bgImage = getImageFromPath(fileImagePath: cloptions.watermarkImage.value)
-        if bgImage.size.width > appvars.windowWidth && bgImage.size.height > appvars.windowHeight && !cloptions.windowHeight.present && !cloptions.watermarkFill.present {
-            // keep the same width ratio but change the height
-            var wWidth = appvars.windowWidth
-            if cloptions.windowWidth.present {
-                wWidth = NumberFormatter().number(from: cloptions.windowWidth.value) as! CGFloat
-            }
-            let widthRatio = wWidth / bgImage.size.width  // get the ration of the image height to the current display width
-            let newHeight = (bgImage.size.height * widthRatio) - 28 //28 needs to be removed to account for the phantom title bar height
-            appvars.windowHeight = floor(newHeight) // floor() will strip any fractional values as a result of the above multiplication
-                                                    // we need to do this as window heights can't be fractional and weird things happen
-                        
-            if !cloptions.watermarkFill.present {
-                cloptions.watermarkFill.present = true
-                cloptions.watermarkFill.value = "fill"
-            }
-        }
-    }
-    
     // anthing that is an option only with no value
     cloptions.button2Option.present         = CLOptionPresent(OptionName: cloptions.button2Option)
     cloptions.infoButtonOption.present      = CLOptionPresent(OptionName: cloptions.infoButtonOption)
