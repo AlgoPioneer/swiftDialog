@@ -10,16 +10,14 @@ import SwiftUI
 
 
 struct ContentView: View {
+    init() {
+        if cloptions.debug.present {
+            print("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
+        }
+    }
 
     var bannerAdjustment       = CGFloat(5)
     var waterMarkFill          = String("")
-    var progressSteps : CGFloat = appvars.timerDefaultSeconds
-    
-    init () {
-        if cloptions.timerBar.present {
-            progressSteps = NumberFormatter().number(from: cloptions.timerBar.value) as! CGFloat
-        }
-    }
         
     var body: some View {
                 
@@ -43,29 +41,22 @@ struct ContentView: View {
                 // Horozontal Line
                 Divider()
                     .frame(width: appvars.windowWidth*appvars.horozontalLineScale, height: 2)
-                
-                if cloptions.video.present {
-                    VideoView(videourl: cloptions.video.value, autoplay: cloptions.videoAutoPlay.present, caption: cloptions.videoCaption.value)
-                } else {
-                    DialogView()
-                }
+                            
+                // Dialog content including message and image if visible
+                DialogView()
                 
                 Spacer()
                 
                 // Buttons
                 HStack() {
-                    if cloptions.infoButtonOption.present || cloptions.buttonInfoTextOption.present {
-                        MoreInfoButton()
-                        if !cloptions.timerBar.present {
-                            Spacer()
-                        }
-                    }
                     if cloptions.timerBar.present {
-                        //progressBarView(progressSteps: (NumberFormatter().number(from: cloptions.timerBar.value) as! CGFloat), visible: !cloptions.hideTimerBar.present)
-                        progressBarView(progressSteps: progressSteps, visible: !cloptions.hideTimerBar.present)
+                        progressBarView(progressSteps: NumberFormatter().number(from: cloptions.timerBar.value) as? CGFloat, visible: true)
                             .frame(alignment: .bottom)
+                    } else {
+                        MoreInfoButton()
+                        Spacer()
                     }
-                    if (cloptions.timerBar.present && cloptions.button1TextOption.present) || !cloptions.timerBar.present || cloptions.hideTimerBar.present  {
+                    if (cloptions.timerBar.present && cloptions.button1TextOption.present) || (!cloptions.timerBar.present) {
                         ButtonView() // contains both button 1 and button 2
                     }
                 }

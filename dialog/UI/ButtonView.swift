@@ -13,10 +13,6 @@ struct ButtonView: View {
     var button1action: String = ""
     var buttonShellAction: Bool = false
     
-    var defaultExit : Int32 = 0
-    var cancelExit  : Int32 = 2
-    var infoExit    : Int32 = 3
-    
     @State private var button1disabled = false
     
     let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect() //trigger after 4 seconds
@@ -29,17 +25,16 @@ struct ButtonView: View {
             button1action = cloptions.button1ActionOption.value
         }
         
-        if cloptions.timerBar.present && !cloptions.hideTimerBar.present {
+        if cloptions.timerBar.present {
             self._button1disabled = State(initialValue: true)
         }
     }
     
     var body: some View {
         //secondary button
-        Spacer()
         HStack {
             if cloptions.button2Option.present {
-                Button(action: {quitDialog(exitCode: appvars.exit2.code)}, label: {
+                Button(action: {quitDialog(exitCode: 2)}, label: {
                     Text(appvars.button2Default)
                         .frame(minWidth: 40, alignment: .center)
                     }
@@ -47,7 +42,7 @@ struct ButtonView: View {
                 .keyboardShortcut(.cancelAction)
             } else if cloptions.button2TextOption.present {
                 let button2Text: String = cloptions.button2TextOption.value
-                Button(action: {quitDialog(exitCode: appvars.exit2.code)}, label: {
+                Button(action: {quitDialog(exitCode: 2)}, label: {
                     Text(button2Text)
                         .frame(minWidth: 40, alignment: .center)
                     }
@@ -74,22 +69,24 @@ struct ButtonView: View {
 
 struct MoreInfoButton: View {
     let buttonInfoAction: String = cloptions.buttonInfoActionOption.value
-    var buttonInfoText : String = cloptions.buttonInfoTextOption.value
-       
+    
     var body: some View {
         HStack() {
-            Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false, shouldQuit: cloptions.quitOnInfo.present)}, label: {
-                Text(buttonInfoText)
-                    .frame(minWidth: 40, alignment: .center)
-                }
-            )
-            .onHover { inside in
-                if inside {
-                    NSCursor.pointingHand.push()
-                } else {
-                    NSCursor.pop()
-                }
+            
+            if cloptions.infoButtonOption.present {
+                Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false)}, label: {
+                    Text(appvars.buttonInfoDefault)
+                        .frame(minWidth: 40, alignment: .center)
+                    }
+                )
+            } else if cloptions.buttonInfoTextOption.present {
+                Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false)}, label: {
+                    Text(cloptions.buttonInfoTextOption.value)
+                        .frame(minWidth: 40, alignment: .center)
+                    }
+                )
             }
+            Spacer()
         }
     }
     
