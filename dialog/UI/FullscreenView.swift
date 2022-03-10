@@ -48,10 +48,8 @@ struct FullscreenView: View {
     var useDefaultStyle = true
     var defaultStyle: MarkdownStyle {
         useDefaultStyle
-        ? MarkdownStyle(font: .system(size: messageContentFontSize),
-                               foregroundColor: .white)
-        : MarkdownStyle(font: .system(size: messageContentFontSize),
-                               foregroundColor: .white)
+        ? DefaultMarkdownStyle(font: .system(size: messageContentFontSize), foregroundColor: NSColor.white)
+        : DefaultMarkdownStyle(font: .system(size: messageContentFontSize), foregroundColor: NSColor.white)
     }
      
     init () {
@@ -69,7 +67,7 @@ struct FullscreenView: View {
         maxBannerWidth = windowWidth * 0.95
         maxBannerHeight = windowHeight * 0.10
         
-        if windowHeight <= 1440 {
+        if windowHeight < 1440 {
             messageContentFontSize = 40
             emptyStackPadding = 50
             titleContentFontSize = appvars.titleFontSize*2
@@ -77,7 +75,7 @@ struct FullscreenView: View {
             bannerPadding = 20
             messageTextLineSpacing = 15
         } else if windowHeight > 1440 {
-            messageContentFontSize = 60
+            messageContentFontSize = 80
             titleContentFontSize = appvars.titleFontSize*4
             iconImageScaleFactor = 1.8
             emptyStackPadding = 90
@@ -159,26 +157,41 @@ struct FullscreenView: View {
                         }
                     }
                     .padding(40)
-                    .frame(minHeight: 200, maxHeight: (NSScreen.main?.frame.height)!/3)
+                    .frame(maxHeight: (NSScreen.main?.frame.height)!/3)
                     .border(appvars.debugBorderColour, width: 2)
                 
+                    
                     // message vstack
                     VStack() {
-                        Markdown(observedDialogContent.messageText)
-                            //.multilineTextAlignment(appvars.messageAlignment)
-                            .markdownStyle(defaultStyle)
-                            .multilineTextAlignment(.center)
+                        //ScrollView(showsIndicators: true) {
+                            Markdown(Document(observedDialogContent.messageText))
+                                //.multilineTextAlignment(appvars.messageAlignment)
+                                .markdownStyle(defaultStyle)
+                                .multilineTextAlignment(.center)
+                        //}
+                        //.preferredColorScheme(.dark)
                         
-                        Spacer()
+                        //Spacer()
                         
-                        //TaskProgressView(observedDialogContent: observedDialogContent)  // future feature
+                        //TaskProgressView(observedDialogContent: observedDialogContent)
                         
                         if cloptions.timerBar.present {
                             timerBarView(progressSteps: NumberFormatter().number(from: cloptions.timerBar.value) as? CGFloat, visible: cloptions.timerBar.present, observedDialogContent: observedDialogContent)
                         }
+                        /*
+                        Text(messageContentOption)
+                            .font(.system(size: messageContentFontSize))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(12)
+                            .lineSpacing(messageTextLineSpacing)
+                            .border(appvars.debugBorderColour, width: 2)
+                         */
                     }
                     .padding(10)
+                    .frame(maxHeight: (NSScreen.main?.frame.width)!/2, alignment: .center) // setting to .infinity should make the message content take up the remainder of the screen
                 }
+                
             }
             .padding(.horizontal, 20) // total padding for the icon/message group
             //.padding(.vertical, 50)

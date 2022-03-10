@@ -20,14 +20,14 @@ struct MessageContent: View {
         
     var defaultStyle: MarkdownStyle {
         useDefaultStyle
-        ? MarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
-        : MarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
+            ? DefaultMarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: messageColour)
+            : DefaultMarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: messageColour)
     }
     
     var customStyle: MarkdownStyle {
         useDefaultStyle
-        ? MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: appvars.messageFontColour)
-        : MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: appvars.messageFontColour)
+            ? DefaultMarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: messageColour)
+            : DefaultMarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: messageColour)
     }
     
     let messageContentOption: String = cloptions.messageOption.value
@@ -41,7 +41,7 @@ struct MessageContent: View {
         } else {
             VStack {
                 if observedDialogContent.listItemPresent {
-                    Markdown(observedDialogContent.messageText)
+                    Markdown(Document(observedDialogContent.messageText))
                         .multilineTextAlignment(appvars.messageAlignment)
                         .markdownStyle(defaultStyle)
                     ListView(observedDialogContent: observedDialogContent)
@@ -49,11 +49,11 @@ struct MessageContent: View {
                 } else {
                     ScrollView() {
                         if appvars.messageFontName == "" {
-                            Markdown(observedDialogContent.messageText)
+                            Markdown(Document(observedDialogContent.messageText))
                                 .multilineTextAlignment(appvars.messageAlignment)
                                 .markdownStyle(defaultStyle)
                         } else {
-                            Markdown(observedDialogContent.messageText)
+                            Markdown(Document(observedDialogContent.messageText))
                                 .multilineTextAlignment(appvars.messageAlignment)
                                 .markdownStyle(customStyle)
                         }
@@ -72,13 +72,15 @@ struct MessageContent: View {
                     Spacer()
                     VStack {
                         TextEntryView()
-                            .padding(.leading, 50)
-                            .padding(.trailing, 50)
+                            //.padding(.leading, 50)
+                            //.padding(.trailing, 50)
+                            .padding(.bottom, 10)
                             .border(appvars.debugBorderColour, width: 2)
 
                         DropdownView()
-                            .padding(.leading, 50)
-                            .padding(.trailing, 50)
+                            //.padding(.leading, 50)
+                            //.padding(.trailing, 50)
+                            .padding(.bottom, 10)
                             .border(appvars.debugBorderColour, width: 2)
                     }
                 }
