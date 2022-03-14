@@ -14,19 +14,12 @@ var iconVisible: Bool = true
 
 // declare our app var in case we want to update values - e.g. future use, multiple dialog sizes
 var appvars = AppVariables()
-var cloptions = CLOptions()
-var textFields = [TextFieldState]()
 
-struct TextFieldState {
-    var title       : String
-    var required    : Bool      = false
-    var secure      : Bool      = false
-    var value       : String    = ""
-}
+var cloptions = CLOptions()
 
 struct AppVariables {
     
-    var cliversion                      = String("1.9.2")
+    var cliversion                      = String("1.9.4")
     
     // message default strings
     var titleDefault                    = String("An Important Message")

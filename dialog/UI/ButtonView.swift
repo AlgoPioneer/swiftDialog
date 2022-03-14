@@ -66,7 +66,7 @@ struct ButtonView: View {
 
         Button(action: {
             observedDialogContent.end()
-            buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedDialogContent)
+            buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction)
             
         }, label: {
             Text(button1Text)

@@ -7,7 +7,6 @@
 // concept and execution apropriated from depNotify
 
 import Foundation
-import SwiftUI
 
 enum StatusState {
     case start
@@ -36,7 +35,6 @@ class DialogUpdatableContent : ObservableObject {
     @Published var listItemStatus: [String]
     @Published var listItemUpdateRow: Int
     @Published var listItemPresent: Bool
-    @Published var requiredTextfieldHighlight: [Color] = Array(repeating: Color.clear, count: textFields.count)
     
     var status: StatusState
     
@@ -73,8 +71,6 @@ class DialogUpdatableContent : ObservableObject {
         button2Value = cloptions.button2TextOption.value
         infoButtonValue = cloptions.infoButtonOption.value
         listItemUpdateRow = 0
-        
-        //requiredTextfieldHighlight = Color.clear
         
         iconImage = cloptions.iconOption.value
         

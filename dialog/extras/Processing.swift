@@ -107,7 +107,7 @@ func shell(_ command: String) -> String {
     return output
 }
 
-func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent? = nil) {
+func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true) {
     //let action: String = CLOptionText(OptionName: cloptions.button1ActionOption, DefaultValue: "")
     
     if (action != "") {
@@ -118,7 +118,7 @@ func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQui
         }
     }
     if shouldQuit {
-        quitDialog(exitCode: exitCode, observedObject: observedObject)
+        quitDialog(exitCode: exitCode)
     }
     //exit(0)
 }
@@ -150,7 +150,7 @@ func getVersionString() -> String {
     return appVersion
 }
 
-func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : DialogUpdatableContent? = nil) {
+func quitDialog(exitCode: Int32, exitMessage: String? = "") {
     //var userOutput: Bool = false
     if exitMessage != "" {
         //print(exitCode)
@@ -168,26 +168,14 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         if appvars.selectedOption != "" {
             outputArray.append("\"SelectedOption\" : \"\(appvars.selectedOption)\"")
             json["SelectedOption"].string = appvars.selectedOption
-        }
-        if appvars.selectedIndex > 0 {
             outputArray.append("\"SelectedIndex\" : \(appvars.selectedIndex)")
             json["SelectedIndex"].int = appvars.selectedIndex
         }
         if cloptions.textField.present {
-            // check to see if fields marked as required have content before allowing the app to exit
-            // if there is an empty field, update the highlight colour
-            var dontQuit = false
-            for i in 0..<textFields.count {
-                if textFields[i].required && textFields[i].value == "" {
-                    observedObject?.requiredTextfieldHighlight[i] = Color.red.opacity(0.7)
-                    dontQuit = true
-                } else {
-                    observedObject?.requiredTextfieldHighlight[i] = Color.clear
-                }
-                outputArray.append("\"\(textFields[i].title)\" : \"\(textFields[i].value)\"")
-                json[textFields[i].title].string = textFields[i].value
+            for i in 0..<appvars.textOptionsArray.count {
+                outputArray.append("\"\(appvars.textOptionsArray[i])\" : \"\(appvars.textFieldText[i])\"")
+                json[appvars.textOptionsArray[i]].string = appvars.textFieldText[i]
             }
-            if dontQuit { return }
         }
         if cloptions.checkbox.present {
             for i in 0..<appvars.checkboxOptionsArray.count {

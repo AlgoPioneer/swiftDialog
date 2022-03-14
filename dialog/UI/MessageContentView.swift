@@ -14,33 +14,25 @@ struct MessageContent: View {
     @ObservedObject var observedDialogContent : DialogUpdatableContent
     @State private var contentHeight: CGFloat = 40
     
-    var fieldPadding: CGFloat = 10
-    
     var messageColour : NSColor = NSColor(appvars.messageFontColour)
     
     var useDefaultStyle = true
         
     var defaultStyle: MarkdownStyle {
         useDefaultStyle
-            ? DefaultMarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: messageColour)
-            : DefaultMarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: messageColour)
+        ? MarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
+        : MarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
     }
     
     var customStyle: MarkdownStyle {
         useDefaultStyle
-            ? DefaultMarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: messageColour)
-            : DefaultMarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: messageColour)
+        ? MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: appvars.messageFontColour)
+        : MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: appvars.messageFontColour)
     }
     
     let messageContentOption: String = cloptions.messageOption.value
     let theAllignment: Alignment = .topLeading
     
-    init(observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
-        if cloptions.hideIcon.present {
-            fieldPadding = 40
-        }
-    }
     
     var body: some View {
         
@@ -49,7 +41,7 @@ struct MessageContent: View {
         } else {
             VStack {
                 if observedDialogContent.listItemPresent {
-                    Markdown(Document(observedDialogContent.messageText))
+                    Markdown(observedDialogContent.messageText)
                         .multilineTextAlignment(appvars.messageAlignment)
                         .markdownStyle(defaultStyle)
                     ListView(observedDialogContent: observedDialogContent)
@@ -57,11 +49,11 @@ struct MessageContent: View {
                 } else {
                     ScrollView() {
                         if appvars.messageFontName == "" {
-                            Markdown(Document(observedDialogContent.messageText))
+                            Markdown(observedDialogContent.messageText)
                                 .multilineTextAlignment(appvars.messageAlignment)
                                 .markdownStyle(defaultStyle)
                         } else {
-                            Markdown(Document(observedDialogContent.messageText))
+                            Markdown(observedDialogContent.messageText)
                                 .multilineTextAlignment(appvars.messageAlignment)
                                 .markdownStyle(customStyle)
                         }
@@ -77,24 +69,22 @@ struct MessageContent: View {
                 
                 Spacer()
                 HStack() {
-                    //Spacer()
+                    Spacer()
                     VStack {
-                        TextEntryView(observedDialogContent: observedDialogContent)
-                            //.padding(.leading, 50)
-                            //.padding(.trailing, 50)
-                            .padding(.bottom, 10)
+                        TextEntryView()
+                            .padding(.leading, 50)
+                            .padding(.trailing, 50)
                             .border(appvars.debugBorderColour, width: 2)
 
                         DropdownView()
-                            //.padding(.leading, 50)
-                            //.padding(.trailing, 50)
-                            .padding(.bottom, 10)
+                            .padding(.leading, 50)
+                            .padding(.trailing, 50)
                             .border(appvars.debugBorderColour, width: 2)
                     }
                 }
             }
-            .padding(.leading, fieldPadding)
-            .padding(.trailing, fieldPadding)
+            .padding(.leading, 40)
+            .padding(.trailing, 40)
         }
     }
 }
