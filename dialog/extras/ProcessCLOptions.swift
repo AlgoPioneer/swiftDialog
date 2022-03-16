@@ -77,14 +77,38 @@ func processCLOptions() {
     
     }
     
-    
     if cloptions.textField.present {
         if json[cloptions.textField.long].exists() {
-            appvars.textOptionsArray = json[cloptions.textField.long].arrayValue.map {$0.stringValue}
+            for i in 0..<json[cloptions.textField.long].arrayValue.count {
+                if json[cloptions.textField.long][i]["title"].stringValue == "" {
+                    textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i].stringValue)))
+                } else {
+                    textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i]["title"].stringValue),
+                                                 required: Bool(json[cloptions.textField.long][i]["required"].boolValue),
+                                                 secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue))
+                                )
+                }
+            }
         } else {
-            appvars.textOptionsArray =  CLOptionMultiOptions(optionName: cloptions.textField.long)
+            for textFieldOption in CLOptionMultiOptions(optionName: cloptions.textField.long) {
+                let items = textFieldOption.components(separatedBy: ",")
+                var fieldTitle : String = ""
+                var fieldSecure : Bool = false
+                var fieldRequire : Bool = false
+                for item in items {
+                    switch item.lowercased() {
+                    case "secure":
+                        fieldSecure = true
+                    case "required":
+                        fieldRequire = true
+                    default:
+                        fieldTitle = item
+                    }
+                }
+                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure))
+            }
         }
-        logger(logMessage: "textOptionsArray : \(appvars.textOptionsArray)")
+        logger(logMessage: "textOptionsArray : \(textFields)")
     }
     
     if cloptions.checkbox.present {
@@ -279,9 +303,14 @@ func processCLOptions() {
         }
     }
             
-    if cloptions.hideIcon.present || cloptions.bannerImage.present {
+    if cloptions.hideIcon.present || cloptions.iconOption.value == "none" || cloptions.bannerImage.present {
         appvars.iconIsHidden = true
         logger(logMessage: "iconIsHidden = true")
+    }
+    
+    if cloptions.centreIcon.present {
+        appvars.iconIsCentred = true
+        logger(logMessage: "iconIsCentred = true")
     }
     
     if cloptions.lockWindow.present {
@@ -514,6 +543,7 @@ func processCLOptionValues() {
     cloptions.button2Option.present         = json[cloptions.button2Option.long].boolValue || CLOptionPresent(OptionName: cloptions.button2Option)
     cloptions.infoButtonOption.present      = json[cloptions.infoButtonOption.long].boolValue || CLOptionPresent(OptionName: cloptions.infoButtonOption)
     cloptions.hideIcon.present              = json[cloptions.hideIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.hideIcon)
+    cloptions.centreIcon.present            = json[cloptions.centreIcon.long].boolValue || json[cloptions.centreIconSE.long].boolValue || CLOptionPresent(OptionName: cloptions.centreIcon) || CLOptionPresent(OptionName: cloptions.centreIconSE)
     cloptions.warningIcon.present           = json[cloptions.warningIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.warningIcon)
     cloptions.infoIcon.present              = json[cloptions.infoIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.infoIcon)
     cloptions.cautionIcon.present           = json[cloptions.cautionIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.cautionIcon)
