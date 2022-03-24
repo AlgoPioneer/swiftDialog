@@ -442,7 +442,7 @@ func processCLOptionValues() {
     cloptions.iconOption.value              = json[cloptions.iconOption.long].string ?? CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
     cloptions.iconOption.present            = json[cloptions.iconOption.long].exists() || CLOptionPresent(OptionName: cloptions.iconOption)
     
-    cloptions.iconSize.value                = json[cloptions.iconOption.long].string ?? CLOptionText(OptionName: cloptions.iconSize)
+    cloptions.iconSize.value                = json[cloptions.iconSize.long].string ?? CLOptionText(OptionName: cloptions.iconSize)
     cloptions.iconSize.present              = json[cloptions.iconSize.long].exists() || CLOptionPresent(OptionName: cloptions.iconSize)
     
     //cloptions.iconHeight.value              = CLOptionText(OptionName: cloptions.iconHeight)
@@ -502,7 +502,10 @@ func processCLOptionValues() {
     
     cloptions.progressBar.value             = json[cloptions.progressBar.long].string ?? CLOptionText(OptionName: cloptions.progressBar)
     cloptions.progressBar.present           = json[cloptions.progressBar.long].exists() || CLOptionPresent(OptionName: cloptions.progressBar)
-                                                                                                        
+    
+    cloptions.progressText.value             = json[cloptions.progressText.long].string ?? CLOptionText(OptionName: cloptions.progressText, DefaultValue: " ")
+    cloptions.progressText.present           = json[cloptions.progressText.long].exists() || CLOptionPresent(OptionName: cloptions.progressText)
+    
     //cloptions.mainImage.value               = CLOptionText(OptionName: cloptions.mainImage)
     cloptions.mainImage.present             = json[cloptions.mainImage.long].exists() || CLOptionPresent(OptionName: cloptions.mainImage)
     
