@@ -163,21 +163,11 @@ struct IconView: View {
                         Image(systemName: builtInIconFill)
                             .resizable()
                             .foregroundColor(Color.white)
-                        if #available(macOS 12.0, *) {
-                            Image(systemName: builtInIconName)
-                                .resizable()
-                                .renderingMode(iconRenderingMode)
-                                .font(Font.title.weight(builtInIconWeight))
-                                .symbolRenderingMode(.hierarchical)
-                                .foregroundStyle(builtInIconColour)
-                        } else {
-                            // Fallback on earlier versions
-                            Image(systemName: builtInIconName)
-                                .resizable()
-                                .renderingMode(iconRenderingMode)
-                                .font(Font.title.weight(builtInIconWeight))
-                                .foregroundColor(builtInIconColour)
-                        }
+                        Image(systemName: builtInIconName)
+                            .resizable()
+                            .renderingMode(iconRenderingMode)
+                            .font(Font.title.weight(builtInIconWeight))
+                            .foregroundColor(builtInIconColour)
                     }
                 }
                 .aspectRatio(contentMode: .fit)
