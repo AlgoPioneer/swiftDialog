@@ -19,11 +19,7 @@ class DialogUpdatableContent : ObservableObject {
     // set up some defaults
     
     var path: String
-    
-    @Published var args : CLOptions = cloptions
-    
     @Published var titleText: String
-    @Published var titleFontColour: Color
     @Published var messageText: String
     @Published var statusText: String
     @Published var progressValue: Double
@@ -31,9 +27,7 @@ class DialogUpdatableContent : ObservableObject {
     @Published var button1Value: String
     @Published var button1Disabled: Bool
     @Published var button2Value: String
-    @Published var button2Present: Bool
     @Published var infoButtonValue: String
-    @Published var infoButtonPresent: Bool
     @Published var iconImage: String
     @Published var iconSize: CGFloat
     @Published var iconPresent: Bool
@@ -85,16 +79,13 @@ class DialogUpdatableContent : ObservableObject {
         }
                 
         titleText = cloptions.titleOption.value
-        titleFontColour = appvars.titleFontColour
         messageText = cloptions.messageOption.value
         statusText = cloptions.progressText.value
         progressValue = 0
         progressTotal = 0
         button1Value = cloptions.button1TextOption.value
         button2Value = cloptions.button2TextOption.value
-        button2Present = cloptions.button2Option.present
         infoButtonValue = cloptions.infoButtonOption.value
-        infoButtonPresent = cloptions.infoButtonOption.present || cloptions.buttonInfoTextOption.present
         listItemUpdateRow = 0
         
         //requiredTextfieldHighlight = Color.clear

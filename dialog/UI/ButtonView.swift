@@ -38,7 +38,17 @@ struct ButtonView: View {
         //secondary button
         Spacer()
         HStack {
-            if observedDialogContent.button2Present || cloptions.button2TextOption.present {
+            if cloptions.button2Option.present {
+                Button(action: {
+                    observedDialogContent.end()
+                    quitDialog(exitCode: appvars.exit2.code)
+                }, label: {
+                    Text(appvars.button2Default)
+                        .frame(minWidth: 40, alignment: .center)
+                    }
+                )
+                .keyboardShortcut(.cancelAction)
+            } else if cloptions.button2TextOption.present {
                 let button2Text: String = observedDialogContent.button2Value
                 Button(action: {
                     observedDialogContent.end()
@@ -77,18 +87,12 @@ struct ButtonView: View {
 
 struct MoreInfoButton: View {
     let buttonInfoAction: String = cloptions.buttonInfoActionOption.value
-    //var buttonInfoText : String = cloptions.buttonInfoTextOption.value
-    
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
-    
-    init(observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
-    }
-    
+    var buttonInfoText : String = cloptions.buttonInfoTextOption.value
+       
     var body: some View {
         HStack() {
             Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false, shouldQuit: cloptions.quitOnInfo.present)}, label: {
-                Text(observedDialogContent.infoButtonValue)
+                Text(buttonInfoText)
                     .frame(minWidth: 40, alignment: .center)
                 }
             )

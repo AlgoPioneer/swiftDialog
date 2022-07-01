@@ -129,11 +129,11 @@ struct FullscreenView: View {
             }
             
             // title vstack
-            if observedDialogContent.args.titleOption.value != "none" {
+            if observedDialogContent.titleText != "none" {
                 HStack {
                     // the spacers in this section push the title and thus the full screen area across the width of the display
                     Spacer()
-                    Text(observedDialogContent.args.titleOption.value)
+                    Text(observedDialogContent.titleText)
                         .foregroundColor(appvars.titleFontColour)
                         .bold()
                         .font(.system(size: titleContentFontSize, weight: appvars.titleFontWeight))
