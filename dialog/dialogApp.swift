@@ -88,6 +88,11 @@ struct dialogApp: App {
         
         observedDialogContent = DialogUpdatableContent()
         
+        if cloptions.constructionKit.present {
+            ConstructionKitView(observedDialogContent: observedDialogContent).showConstructionKit()
+            appvars.windowIsMoveable = true
+        }
+        
         // bring to front on launch
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -120,7 +125,7 @@ struct dialogApp: App {
                 .frame(width: 0, height: 0) //ensures hostingwindowfinder isn't taking up any real estate
                 
                 ContentView(observedDialogContent: observedDialogContent)
-                    .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight) // + appvars.bannerHeight)
+                    .frame(width: observedDialogContent.windowWidth.rounded(), height: observedDialogContent.windowHeight.rounded()) // + appvars.bannerHeight)
                 //.frame(idealWidth: appvars.windowWidth, idealHeight: appvars.windowHeight)
                     .sheet(isPresented: $observedDialogContent.showSheet, content: {
                         ErrorView(observedContent: observedDialogContent)
@@ -130,6 +135,11 @@ struct dialogApp: App {
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
+        /*
+        WindowGroup("ConstructionKit") {
+            ConstructionKitView(observedDialogContent: observedDialogContent)
+        }
+         */
     }
 
     
