@@ -10,7 +10,7 @@ import Foundation
 
 struct timerBarView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
     
     @State var progress: CGFloat = 0
     @State var progressWidth : CGFloat
@@ -56,7 +56,7 @@ struct timerBarView: View {
     var barVisible: Bool
     
     init(progressSteps : CGFloat?, visible : Bool?, observedDialogContent : DialogUpdatableContent) {
-        self.observedData = observedDialogContent
+        self.observedDialogContent = observedDialogContent
         barRadius = barheight/2 // adjusting this affects "roundness"
         steps = progressSteps ?? 10
         timerSteps = steps - 1
@@ -90,7 +90,7 @@ struct timerBarView: View {
                                         timer.upstream.connect().cancel()
                                         // add a slight delay so the 0 countdown is displayed for a fraction of a second before dialog quits
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                            observedData.end()
+                                            observedDialogContent.end()
                                             quitDialog(exitCode: appvars.exit4.code)
                                         }
                                         //perform(quitDialog(exitCode: 4), with: nil, afterDelay: 4.0)
@@ -128,7 +128,7 @@ struct timerBarView: View {
                         progress += 1
                     }
                     if progress > timerSteps {
-                        observedData.end()
+                        observedDialogContent.end()
                         quitDialog(exitCode: appvars.exit4.code)
                     }
                 }

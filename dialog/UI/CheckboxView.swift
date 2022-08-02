@@ -10,14 +10,14 @@ import SwiftUI
 struct CheckboxView: View {
     @State var checkboxValues = appvars.checkboxValue //Array(repeating: false, count: 64)
     //@State var textFieldValue = ""
-    //var textFieldLabel = CLOptionText(OptionName: appArguments.textField)
+    //var textFieldLabel = CLOptionText(OptionName: cloptions.textField)
     let checkboxLabels = appvars.checkboxOptionsArray
     let checkboxDisabled = appvars.checkboxDisabled
-    var checkboxPresent: Bool = appArguments.checkbox.present
+    var checkboxPresent: Bool = cloptions.checkbox.present
     
     init() {
         /*
-        if appArguments..present {
+        if cloptions..present {
             checkboxPresent = true
             for _ in checkboxLabels {
                 checkboxValues.append(" ")

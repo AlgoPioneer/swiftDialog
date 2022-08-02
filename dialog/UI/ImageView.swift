@@ -18,19 +18,12 @@ struct ImageView: View {
     var autoPlaySeconds : CGFloat
     
     
-    init(imageArray: [MainImage], captionArray: Array<String>, autoPlaySeconds : CGFloat) {
-        //for imagePath in imageArray {
-        for i in 0..<imageArray.count {
-                if imageArray[i].path != "" {
-                    images.append(getImageFromPath(fileImagePath: imageArray[i].path))
-                    captions.append(imageArray[i].caption)
-                }
-                //if imageArray[i].caption != "" {
-                //    captions.append(imageArray[i].caption)
-                //}
+    init(imageArray: Array<String>, captionArray: Array<String>, autoPlaySeconds : CGFloat) {
+        for imagePath in imageArray {
+            if imagePath != "" {
+                images.append(getImageFromPath(fileImagePath: imagePath))
             }
-        //}
-        /*
+        }
         for imageCaption in captionArray {
             captions.append(imageCaption)
         }
@@ -38,7 +31,7 @@ struct ImageView: View {
         while captions.count < images.count {
             captions.append("")
         }
-        */
+        
         self.autoPlaySeconds = autoPlaySeconds
     }
     
@@ -53,7 +46,7 @@ struct ImageView: View {
                             .scaledToFit()
                             .cornerRadius(10)
                         if captions.count > 0 {
-                            if appArguments.fullScreenWindow.present {
+                            if cloptions.fullScreenWindow.present {
                                 Text(captions[imageIndex])
                                     .font(.system(size: 60))
                                     .foregroundColor(.white)
