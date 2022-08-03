@@ -30,9 +30,32 @@ struct StatusImage: View {
     }
 }
 
+struct CirclerPercentageProgressViewStyle : ProgressViewStyle {
+    public func makeBody(configuration: LinearProgressViewStyle.Configuration) -> some View {
+        let stroke : CGFloat = 5
+        let padding : CGFloat = stroke / 2
+        VStack() {
+            ZStack {
+                Circle()
+                    .stroke(lineWidth: stroke)
+                    .opacity(0.3)
+                    .foregroundColor(Color.accentColor.opacity(0.5))
+                Circle()
+                    .trim(from: 0.0, to: CGFloat(configuration.fractionCompleted ?? 0))
+                .stroke(style: StrokeStyle(lineWidth: stroke, lineCap: .round, lineJoin: .round))
+                .foregroundColor(Color.accentColor)
+                .rotationEffect(.degrees(-90))
+                //.animation(.linear)
+            }
+            .animation(.linear)
+            .padding(.trailing, padding)
+        }
+    }
+}
+
 struct ListView: View {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
     var rowHeight: CGFloat = appvars.messageFontSize + 14
     var rowStatusHeight: CGFloat = appvars.messageFontSize + 5
@@ -40,9 +63,9 @@ struct ListView: View {
     var proportionalListHeight: CGFloat = 0
     
     init(observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
-        if cloptions.listStyle.present {
-            switch cloptions.listStyle.value {
+        self.observedData = observedDialogContent
+        if appArguments.listStyle.present {
+            switch appArguments.listStyle.value {
             case "expanded":
                 rowHeight = rowHeight + 15
             case "compact":
@@ -57,27 +80,31 @@ struct ListView: View {
     
     
     var body: some View {
-        if observedDialogContent.listItemPresent {
+        if observedData.args.listItem.present {
             ScrollViewReader { proxy in
                 GeometryReader { geometry in
-                    let listHeightPadding = ((geometry.size.height/CGFloat(observedDialogContent.listItemsArray.count)/2) * proportionalListHeight)
+                    let listHeightPadding = ((geometry.size.height/CGFloat(observedData.listItemsArray.count)/2) * proportionalListHeight)
                 //withAnimation(.default) {
                     VStack() {
-                        List(0..<observedDialogContent.listItemsArray.count, id: \.self) {i in
+                        List(0..<observedData.listItemsArray.count, id: \.self) {i in
                             VStack {
                                 HStack {
-                                    Text(observedDialogContent.listItemsArray[i].title)
+                                    Text(observedData.listItemsArray[i].title)
                                         .font(.system(size: rowFontSize))
                                         .id(i)
                                     Spacer()
                                     HStack {
-                                        if observedDialogContent.listItemsArray[i].statusText != "" {
-                                            Text(observedDialogContent.listItemsArray[i].statusText)
-                                                .font(.system(size: (rowFontSize * 0.8)))
-                                                .foregroundColor(.secondary)
+                                        if observedData.listItemsArray[i].statusText != "" {
+                                            Text(observedData.listItemsArray[i].statusText)
+                                                .font(.system(size: rowFontSize))
                                                 .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
                                         }
-                                        switch observedDialogContent.listItemsArray[i].statusIcon {
+                                        switch observedData.listItemsArray[i].statusIcon {
+                                        case "progress" :
+                                            ProgressView("", value: observedData.listItemsArray[i].progress, total: 100)
+                                                .progressViewStyle(CirclerPercentageProgressViewStyle())
+                                                .frame(width: rowStatusHeight, height: rowStatusHeight-5)
+                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
                                         case "wait" :
                                             ProgressView()
                                                 .progressViewStyle(.circular)
@@ -105,10 +132,10 @@ struct ListView: View {
                             //.frame(height: rowHeight+listHeightPadding)
                         }
                     }
-                    .onChange(of: observedDialogContent.listItemUpdateRow, perform: { _ in
+                    .onChange(of: observedData.listItemUpdateRow, perform: { _ in
                         DispatchQueue.main.async {
                             withAnimation(.easeInOut(duration: 0.5)) {
-                                proxy.scrollTo(observedDialogContent.listItemUpdateRow)
+                                proxy.scrollTo(observedData.listItemUpdateRow)
                             }
                         }
                     })
