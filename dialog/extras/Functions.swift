@@ -81,7 +81,7 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
             return errorImage
         } else {
         
-            quitDialog(exitCode: appvars.exit201.code, exitMessage: "\(appvars.exit201.message) \(fileImagePath)", observedObject: DialogUpdatableContent())
+            quitDialog(exitCode: appvars.exit201.code, exitMessage: "\(appvars.exit201.message) \(fileImagePath)")
         }
     }
   
@@ -141,8 +141,8 @@ func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
     return  returnValue
 }
 
-func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent) {
-    //let action: String = CLOptionText(OptionName: appArguments.button1ActionOption, DefaultValue: "")
+func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent? = nil) {
+    //let action: String = CLOptionText(OptionName: cloptions.button1ActionOption, DefaultValue: "")
     
     if (action != "") {
         if executeShell {
@@ -209,51 +209,49 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         //build output array
         var outputArray : Array = [String]()
         
-        if appArguments.dropdownValues.present {
-            if appvars.dropdownItems.count == 1 {
-                outputArray.append("\"SelectedOption\" : \"\(appvars.dropdownItems[0].selectedValue)\"")
-                json["SelectedOption"].string = appvars.dropdownItems[0].selectedValue
-                outputArray.append("\"SelectedIndex\" : \(appvars.dropdownItems[0].values.firstIndex(of: appvars.dropdownItems[0].selectedValue) ?? -1)")
-                json["SelectedIndex"].int = appvars.dropdownItems[0].values.firstIndex(of: appvars.dropdownItems[0].selectedValue) ?? -1
+        if cloptions.dropdownValues.present {
+            if dropdownItems.count == 1 {
+                outputArray.append("\"SelectedOption\" : \"\(dropdownItems[0].selectedValue)\"")
+                json["SelectedOption"].string = dropdownItems[0].selectedValue
+                outputArray.append("\"SelectedIndex\" : \(dropdownItems[0].values.firstIndex(of: dropdownItems[0].selectedValue) ?? -1)")
+                json["SelectedIndex"].int = dropdownItems[0].values.firstIndex(of: dropdownItems[0].selectedValue) ?? -1
             }
-            for i in 0..<appvars.dropdownItems.count {
-                outputArray.append("\"\(appvars.dropdownItems[i].title)\" : \"\(appvars.dropdownItems[i].selectedValue)\"")
-                outputArray.append("\"\(appvars.dropdownItems[i].title)\" index : \"\(appvars.dropdownItems[i].values.firstIndex(of: appvars.dropdownItems[i].selectedValue) ?? -1)\"")
-                json[appvars.dropdownItems[i].title] = ["selectedValue" : appvars.dropdownItems[i].selectedValue, "selectedIndex" : appvars.dropdownItems[i].values.firstIndex(of: appvars.dropdownItems[i].selectedValue) ?? -1]
+            for i in 0..<dropdownItems.count {
+                outputArray.append("\"\(dropdownItems[i].title)\" : \"\(dropdownItems[i].selectedValue)\"")
+                outputArray.append("\"\(dropdownItems[i].title)\" index : \"\(dropdownItems[i].values.firstIndex(of: dropdownItems[i].selectedValue) ?? -1)\"")
+                json[dropdownItems[i].title] = ["selectedValue" : dropdownItems[i].selectedValue, "selectedIndex" : dropdownItems[i].values.firstIndex(of: dropdownItems[i].selectedValue) ?? -1]
             }
         }
         
-        if appArguments.textField.present {
+        if cloptions.textField.present {
             // check to see if fields marked as required have content before allowing the app to exit
             // if there is an empty field, update the highlight colour
             var dontQuit = false
-            for i in 0..<(observedObject?.textEntryArray.count ?? 0) {
+            for i in 0..<textFields.count {
                 //check for required fields
-                if observedObject?.textEntryArray[i].required ?? false && observedObject?.textEntryArray[i].value == "" { // && textFields[i].regex.isEmpty {
+                if textFields[i].required && textFields[i].value == "" { // && textFields[i].regex.isEmpty {
                     NSSound.beep()
-                    observedObject?.textEntryArray[i].requiredTextfieldHighlight = Color.red
-                    observedObject?.sheetErrorMessage += "• "+(observedObject?.textEntryArray[i].title ?? "Field \(i)")+" "+"is-required".localized+"\n"
+                    observedObject?.requiredTextfieldHighlight[i] = Color.red
+                    observedObject?.sheetErrorMessage += "• "+textFields[i].title+" "+"is-required".localized+"\n"
                     dontQuit = true
                 
                 //check for regex requirements
-                } else if !(observedObject?.textEntryArray[i].value.isEmpty ?? false)
-                            && !(observedObject?.textEntryArray[i].regex.isEmpty ?? false)
-                            && !checkRegexPattern(regexPattern: observedObject?.textEntryArray[i].regex ?? "", textToValidate: observedObject?.textEntryArray[i].value ?? "") {
+                } else if !textFields[i].value.isEmpty && !textFields[i].regex.isEmpty && !checkRegexPattern(regexPattern: textFields[i].regex, textToValidate: textFields[i].value) {
                     NSSound.beep()
-                    observedObject?.textEntryArray[i].requiredTextfieldHighlight = Color.green
+                    observedObject?.requiredTextfieldHighlight[i] = Color.green
                     observedObject?.showSheet = true
-                    observedObject?.sheetErrorMessage += "• "+(observedObject?.textEntryArray[i].regexError ?? "Regex Check Failed\n")
+                    observedObject?.sheetErrorMessage += "• "+textFields[i].regexError+"\n"
                     dontQuit = true
                 } else {
-                    observedObject?.textEntryArray[i].requiredTextfieldHighlight = Color.clear
+                    observedObject?.requiredTextfieldHighlight[i] = Color.clear
                 }
                 
-                outputArray.append("\(observedObject?.textEntryArray[i].title ?? "field \(i)") : \(observedObject?.textEntryArray[i].value ?? "")")
-                json[observedObject?.textEntryArray[i].title ?? "Field \(i)"].string = observedObject?.textEntryArray[i].value
+                outputArray.append("\"\(textFields[i].title)\" : \"\(textFields[i].value)\"")
+                json[textFields[i].title].string = textFields[i].value
             }
             if dontQuit { return }
         }
-        if appArguments.checkbox.present {
+        if cloptions.checkbox.present {
             for i in 0..<appvars.checkboxOptionsArray.count {
                 outputArray.append("\"\(appvars.checkboxOptionsArray[i])\" : \"\(appvars.checkboxValue[i])\"")
                 json[appvars.checkboxOptionsArray[i]].boolValue = appvars.checkboxValue[i]
@@ -261,7 +259,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         }
                  
         // print the output
-        if observedObject?.args.jsonOutPut.present ?? false { //} appvars.jsonOut {
+        if appvars.jsonOut {
             print(json)
         } else  {
             for i in 0..<outputArray.count {
@@ -424,7 +422,7 @@ func isDNDEnabled() -> Bool {
             return userPref["enabled"] as! Bool
         }
     } catch {
-        quitDialog(exitCode: 21, exitMessage: "DND Prefs unavailable", observedObject: DialogUpdatableContent())
+        quitDialog(exitCode: 21, exitMessage: "DND Prefs unavailable")
     }
     return false
 }

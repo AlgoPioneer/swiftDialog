@@ -21,7 +21,7 @@ var background = BlurWindowController()
 @main
 struct dialogApp: App {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
         
     init () {
         
@@ -41,7 +41,7 @@ struct dialogApp: App {
         processCLOptionValues()
         
         // check for jamfhelper mode
-        if appArguments.jamfHelperMode.present {
+        if cloptions.jamfHelperMode.present {
             logger(logMessage: "converting jh to dialog")
             convertFromJamfHelperSyntax()
         }
@@ -57,12 +57,12 @@ struct dialogApp: App {
         appvars.iconWidth = appvars.iconWidth * appvars.scaleFactor
         appvars.iconHeight = appvars.iconHeight * appvars.scaleFactor
         
-        if appArguments.fullScreenWindow.present {
+        if cloptions.fullScreenWindow.present {
             FullscreenView().showFullScreen()
         }
         
         //check debug mode and print info
-        if appArguments.debug.present {
+        if cloptions.debug.present {
             logger(logMessage: "debug options presented. dialog state sent to stdout")
             appvars.debugMode = true
             appvars.debugBorderColour = Color.green
@@ -77,8 +77,8 @@ struct dialogApp: App {
               }
             }
             print("\nApplication Command Line Options")
-            let mirrored_appArguments = Mirror(reflecting: appArguments)
-            for (_, attr) in mirrored_appArguments.children.enumerated() {
+            let mirrored_cloptions = Mirror(reflecting: cloptions)
+            for (_, attr) in mirrored_cloptions.children.enumerated() {
                 if let propertyName = attr.label as String? {
                 print("  \(propertyName) = \(attr.value)")
               }
@@ -86,12 +86,7 @@ struct dialogApp: App {
         }
         logger(logMessage: "width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
         
-        observedData = DialogUpdatableContent()
-        
-        if appArguments.constructionKit.present {
-            ConstructionKitView(observedDialogContent: observedData).showConstructionKit()
-            observedData.args.movableWindow.present = true
-        }
+        observedDialogContent = DialogUpdatableContent()
         
         // bring to front on launch
         NSApp.activate(ignoringOtherApps: true)
@@ -104,48 +99,37 @@ struct dialogApp: App {
                     window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
                     window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
                     window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
-                    window?.isMovable = observedData.args.movableWindow.present
+                    window?.isMovable = appvars.windowIsMoveable
 
-                    if observedData.args.forceOnTop.present {
+                    if appvars.windowOnTop {
                         window?.level = .floating
                     } else {
                         window?.level = .normal
                     }
 
-                    if observedData.args.blurScreen.present && !appArguments.fullScreenWindow.present { //blur background
+                    if cloptions.blurScreen.present && !cloptions.fullScreenWindow.present { //blur background
                         background.showWindow(self)
-                        for i in 0..<NSApp.windows.count {
-                            if NSApp.windows[i].identifier != NSUserInterfaceItemIdentifier("blur") {
-                                NSApp.windows[i].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
-                            }
-                        }
-                    } else {
-                        background.close()
+                        NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
                     }
                     
-                    if observedData.args.forceOnTop.present || observedData.args.blurScreen.present {
+                    if cloptions.forceOnTop.present || cloptions.blurScreen.present {
                         NSApp.activate(ignoringOtherApps: true)
                     }
                     
                 }
                 .frame(width: 0, height: 0) //ensures hostingwindowfinder isn't taking up any real estate
                 
-                ContentView(observedDialogContent: observedData)
-                    .frame(width: observedData.windowWidth.rounded(), height: observedData.windowHeight.rounded()) // + appvars.bannerHeight)
+                ContentView(observedDialogContent: observedDialogContent)
+                    .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight) // + appvars.bannerHeight)
                 //.frame(idealWidth: appvars.windowWidth, idealHeight: appvars.windowHeight)
-                    .sheet(isPresented: $observedData.showSheet, content: {
-                        ErrorView(observedContent: observedData)
+                    .sheet(isPresented: $observedDialogContent.showSheet, content: {
+                        ErrorView(observedContent: observedDialogContent)
                     })
 
             }
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
-        /*
-        WindowGroup("ConstructionKit") {
-            ConstructionKitView(observedDialogContent: observedDialogContent)
-        }
-         */
     }
 
     

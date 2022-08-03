@@ -12,26 +12,26 @@ import AppKit
 
 struct DialogView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
     
     var iconDisplayWidth : CGFloat
     
     init(observedDialogContent : DialogUpdatableContent) {
-        if !observedDialogContent.args.iconOption.present { //} appvars.iconIsHidden {
+        if !observedDialogContent.iconPresent { //} appvars.iconIsHidden {
             iconDisplayWidth = 0
         } else {
             iconDisplayWidth = observedDialogContent.iconSize
         }
-        self.observedData = observedDialogContent
+        self.observedDialogContent = observedDialogContent
     }
     
     
     var body: some View {
         VStack { //}(alignment: .top, spacing: nil) {
             HStack {
-                if (observedData.args.iconOption.present && !observedData.args.centreIcon.present && observedData.args.iconOption.value != "none") {
+                if (observedDialogContent.iconPresent && !observedDialogContent.centreIconPresent && !(observedDialogContent.iconImage == "none")) {
                     VStack {
-                        IconView(observedDialogContent: observedData)
+                        IconView(observedDialogContent: observedDialogContent)
                             .frame(width: iconDisplayWidth, alignment: .top)
                             .border(appvars.debugBorderColour, width: 2)
                             .padding(.top, 20)
@@ -40,10 +40,10 @@ struct DialogView: View {
                     }
                 }
                 
-                MessageContent(observedDialogContent: observedData)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                MessageContent(observedDialogContent: observedDialogContent)
+                    .border(appvars.debugBorderColour, width: 2)
             }
-            TaskProgressView(observedData: observedData)
+            TaskProgressView(observedDialogContent: observedDialogContent)
         }
     }
 }

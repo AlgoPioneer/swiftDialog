@@ -9,17 +9,17 @@ import SwiftUI
 
 struct TaskProgressView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
-        
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    
     var body: some View {
-        if observedData.args.progressBar.present {
+        if cloptions.progressBar.present {
             VStack {
-                ProgressView(value: observedData.progressValue, total: observedData.progressTotal)
-                    .progressViewStyle(.linear)
-                Text(observedData.statusText)
+                ProgressView(value: observedDialogContent.progressValue, total: observedDialogContent.progressTotal)
+                    .padding(.leading,40)
+                    .padding(.trailing,40)
+                Text(observedDialogContent.statusText)
+
             }
-            .padding(.leading,40)
-            .padding(.trailing,40)
         }
     }
 }
