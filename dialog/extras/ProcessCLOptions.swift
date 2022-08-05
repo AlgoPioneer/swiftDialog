@@ -109,7 +109,10 @@ func processCLOptions() {
                         title: String(json[cloptions.textField.long][i]["title"].stringValue),
                         required: Bool(json[cloptions.textField.long][i]["required"].boolValue),
                         secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue),
+                        editor: Bool(json[cloptions.textField.long][i]["editor"].boolValue),
                         prompt: String(json[cloptions.textField.long][i]["prompt"].stringValue),
+                        fileSelect: Bool(json[cloptions.textField.long][i]["fileselect"].boolValue),
+                        fileType: String(json[cloptions.textField.long][i]["filetype"].stringValue),
                         regex: String(json[cloptions.textField.long][i]["regex"].stringValue),
                         regexError: String(json[cloptions.textField.long][i]["regexerror"].stringValue))
                     )
@@ -120,10 +123,13 @@ func processCLOptions() {
                 let items = textFieldOption.split(usingRegex: appvars.argRegex)
                 var fieldTitle : String = ""
                 var fieldPrompt : String = ""
+                var fieldSelectType : String = ""
+                var fieldFileSelect : Bool = false
                 var fieldRegex : String = ""
                 var fieldRegexErrror : String = ""
                 var fieldSecure : Bool = false
                 var fieldRequire : Bool = false
+                var fieldEditor : Bool = false
                 if items.count > 0 {
                     fieldTitle = items[0]
                     if items.count > 1 {
@@ -137,8 +143,14 @@ func processCLOptions() {
                                 fieldSecure = true
                             case "required":
                                 fieldRequire = true
+                            case "editor":
+                                fieldEditor = true
                             case "prompt":
                                 fieldPrompt = items[index+1]
+                            case "fileselect":
+                                fieldFileSelect = true
+                            case "filetype":
+                                fieldSelectType = items[index+1]
                             case "regex":
                                 fieldRegex = items[index+1]
                             case "regexerror":
@@ -148,7 +160,15 @@ func processCLOptions() {
                         }
                     }
                 }
-                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, prompt: fieldPrompt, regex: fieldRegex, regexError: fieldRegexErrror))
+                textFields.append(TextFieldState(title: fieldTitle,
+                                                 required: fieldRequire,
+                                                 secure: fieldSecure,
+                                                 editor: fieldEditor,
+                                                 prompt: fieldPrompt,
+                                                 fileSelect: fieldFileSelect,
+                                                 fileType: fieldSelectType,
+                                                 regex: fieldRegex,
+                                                 regexError: fieldRegexErrror))
             }
         }
         logger(logMessage: "textOptionsArray : \(textFields)")
@@ -694,6 +714,7 @@ func processCLOptionValues() {
     cloptions.hideTimerBar.present          = json[cloptions.hideTimerBar.long].boolValue || CLOptionPresent(OptionName: cloptions.hideTimerBar)
     cloptions.quitOnInfo.present            = json[cloptions.quitOnInfo.long].boolValue || CLOptionPresent(OptionName: cloptions.quitOnInfo)
     cloptions.blurScreen.present            = json[cloptions.blurScreen.long].boolValue || CLOptionPresent(OptionName: cloptions.blurScreen)
+    cloptions.miniMode.present              = json[cloptions.miniMode.long].boolValue || CLOptionPresent(OptionName: cloptions.miniMode)
     
     // command line only options
     cloptions.listFonts.present             = CLOptionPresent(OptionName: cloptions.listFonts)

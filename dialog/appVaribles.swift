@@ -18,12 +18,15 @@ var cloptions = CLOptions()
 var textFields = [TextFieldState]()
 var dropdownItems = [DropDownItems]()
 
-
 struct TextFieldState {
     var title           : String
     var required        : Bool      = false
     var secure          : Bool      = false
+    var editor          : Bool      = false
     var prompt          : String    = ""
+    var fileSelect      : Bool      = false
+    var selectLabel     : String    = ""
+    var fileType        : String    = ""
     var regex           : String    = ""
     var regexError      : String    = ""
     var value           : String    = ""
@@ -36,16 +39,26 @@ struct DropDownItems {
     var selectedValue   : String = ""
 }
 
-struct ListItems {
+struct ListItems: Codable {
     var title           : String
     var icon            : String = ""
     var statusText      : String = ""
     var statusIcon      : String = ""
+    var progress        : CGFloat = 0
+    var dictionary: [String: Any] {
+            return ["title": title,
+                    "statustext": statusText,
+                    "status": statusIcon,
+                    "progress": progress]
+        }
+    var nsDictionary: NSDictionary {
+            return dictionary as NSDictionary
+        }
 }
 
 struct AppVariables {
     
-    var cliversion                      = "1.11.1"
+    var cliversion                      = "1.11.2"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
@@ -130,7 +143,7 @@ struct AppVariables {
     
     var quitKeyCharacter                = String("q")
     
-    var argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?secure)|(,\\s?required))")
+    var argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?secure)|(,\\s?required)|(,\\s?editor)|(,\\s?fileselect))")
     
     // exit codes and error messages
     var exit0                           = (code: Int32(0),   message: String("")) // normal exit
@@ -238,4 +251,5 @@ struct CLOptions {
     // civhmtsb
     
     var jamfHelperMode           = (long: String("jh"),                short: String("jh"),  value : String(""), present : Bool(false))
+    var miniMode                 = (long: String("mini"),              short: String(""),    value : String(""), present : Bool(false))
 }
