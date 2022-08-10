@@ -10,7 +10,7 @@ import SwiftUI
 
 struct IconOverlayView: View {
     
-    //@ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
     
     var overlayImagePath: String // cloptions.overlayIconOption.value // CLOptionText(OptionName: cloptions.overlayIconOption)
     var overlayIconPresent: Bool
@@ -37,15 +37,11 @@ struct IconOverlayView: View {
     var sfGradientPresent: Bool = false
     var sfBackgroundIconColour: Color = Color.background
         
-    init (image : String = "") {
-        //self.observedDialogContent = observedDialogContent
+    init (observedDialogContent : DialogUpdatableContent) {
+        self.observedDialogContent = observedDialogContent
         
-        overlayImagePath = image
-        overlayIconPresent = false
-        
-        if image != "" {
-            overlayIconPresent = true
-        }
+        overlayImagePath = observedDialogContent.overlayIconImage
+        overlayIconPresent = observedDialogContent.overlayIconPresent
         
         if overlayImagePath.starts(with: "http") {
             imgFromURL = true
