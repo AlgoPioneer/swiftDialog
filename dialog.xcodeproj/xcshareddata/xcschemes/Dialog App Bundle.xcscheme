@@ -52,7 +52,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "--message &quot;this is a test&quot; --mini"
+            argument = "--title &quot;Builder Test&quot; --builder"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

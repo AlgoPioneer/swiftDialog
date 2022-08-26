@@ -21,7 +21,7 @@ var background = BlurWindowController()
 @main
 struct dialogApp: App {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
         
     init () {
         
@@ -41,7 +41,7 @@ struct dialogApp: App {
         processCLOptionValues()
         
         // check for jamfhelper mode
-        if cloptions.jamfHelperMode.present {
+        if appArguments.jamfHelperMode.present {
             logger(logMessage: "converting jh to dialog")
             convertFromJamfHelperSyntax()
         }
@@ -57,17 +57,12 @@ struct dialogApp: App {
         appvars.iconWidth = appvars.iconWidth * appvars.scaleFactor
         appvars.iconHeight = appvars.iconHeight * appvars.scaleFactor
         
-        if cloptions.miniMode.present {
-            appvars.windowWidth = 540
-            appvars.windowHeight = 128
-        }
-        
-        if cloptions.fullScreenWindow.present {
+        if appArguments.fullScreenWindow.present {
             FullscreenView().showFullScreen()
         }
         
         //check debug mode and print info
-        if cloptions.debug.present {
+        if appArguments.debug.present {
             logger(logMessage: "debug options presented. dialog state sent to stdout")
             appvars.debugMode = true
             appvars.debugBorderColour = Color.green
@@ -82,8 +77,8 @@ struct dialogApp: App {
               }
             }
             print("\nApplication Command Line Options")
-            let mirrored_cloptions = Mirror(reflecting: cloptions)
-            for (_, attr) in mirrored_cloptions.children.enumerated() {
+            let mirrored_appArguments = Mirror(reflecting: appArguments)
+            for (_, attr) in mirrored_appArguments.children.enumerated() {
                 if let propertyName = attr.label as String? {
                 print("  \(propertyName) = \(attr.value)")
               }
@@ -91,7 +86,12 @@ struct dialogApp: App {
         }
         logger(logMessage: "width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
         
-        observedDialogContent = DialogUpdatableContent()
+        observedData = DialogUpdatableContent()
+        
+        if appArguments.constructionKit.present {
+            ConstructionKitView(observedDialogContent: observedData).showConstructionKit()
+            observedData.args.movableWindow.present = true
+        }
         
         // bring to front on launch
         NSApp.activate(ignoringOtherApps: true)
@@ -104,44 +104,48 @@ struct dialogApp: App {
                     window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
                     window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
                     window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
-                    window?.isMovable = appvars.windowIsMoveable
-                    
+                    window?.isMovable = observedData.args.movableWindow.present
 
-                    if appvars.windowOnTop {
+                    if observedData.args.forceOnTop.present {
                         window?.level = .floating
                     } else {
                         window?.level = .normal
                     }
 
-                    if cloptions.blurScreen.present && !cloptions.fullScreenWindow.present { //blur background
+                    if observedData.args.blurScreen.present && !appArguments.fullScreenWindow.present { //blur background
                         background.showWindow(self)
-                        NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
+                        for i in 0..<NSApp.windows.count {
+                            if NSApp.windows[i].identifier != NSUserInterfaceItemIdentifier("blur") {
+                                NSApp.windows[i].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
+                            }
+                        }
+                    } else {
+                        background.close()
                     }
                     
-                    if cloptions.forceOnTop.present || cloptions.blurScreen.present {
+                    if observedData.args.forceOnTop.present || observedData.args.blurScreen.present {
                         NSApp.activate(ignoringOtherApps: true)
                     }
                     
                 }
                 .frame(width: 0, height: 0) //ensures hostingwindowfinder isn't taking up any real estate
                 
-                if cloptions.miniMode.present {
-                    MiniView(observedContent: observedDialogContent)
-                        .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight)
-                        //.frame(height: 128)
-                        //.border(.red)
-                } else {
-                    ContentView(observedDialogContent: observedDialogContent)
-                        .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight) // + appvars.bannerHeight)
-                        .sheet(isPresented: $observedDialogContent.showSheet, content: {
-                            ErrorView(observedContent: observedDialogContent)
-                        })
-                }
+                ContentView(observedDialogContent: observedData)
+                    .frame(width: observedData.windowWidth.rounded(), height: observedData.windowHeight.rounded()) // + appvars.bannerHeight)
+                //.frame(idealWidth: appvars.windowWidth, idealHeight: appvars.windowHeight)
+                    .sheet(isPresented: $observedData.showSheet, content: {
+                        ErrorView(observedContent: observedData)
+                    })
 
             }
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
+        /*
+        WindowGroup("ConstructionKit") {
+            ConstructionKitView(observedDialogContent: observedDialogContent)
+        }
+         */
     }
 
     

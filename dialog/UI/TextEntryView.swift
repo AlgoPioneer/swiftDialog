@@ -7,127 +7,82 @@
 
 import SwiftUI
 
-extension NSTextView {
-    open override var frame: CGRect {
-        didSet {
-            backgroundColor = .clear
-            drawsBackground = true
-        }
-
-    }
-}
-
 struct TextEntryView: View {
-
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
-
-    @State var textFieldValue = Array(repeating: "", count: textFields.count)
-    //var textPromptValue = Array(repeating: "", count: textFields.count)
-
+    
+    @ObservedObject var observedData : DialogUpdatableContent
+    
+    //@State var textFieldValue = Array(repeating: "", count: appvars.textFields.count)
+    //var textPromptValue = Array(repeating: "", count: appvars.textFields.count)
+    
     @State private var animationAmount = 1.0
-
+    
     @State private var showingSheet = false
-
-    var textFieldPresent: Bool = false
+    
+    
+    //var textFieldPresent: Bool = false
     var fieldwidth: CGFloat = 0
-    var requiredFieldsPresent : Bool = false
-
+    
     init(observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
-        if cloptions.textField.present {
-            textFieldPresent = true
-            for i in 0..<textFields.count {
-                textFieldValue.append(" ")
-                if textFields[i].required {
-                    requiredFieldsPresent = true
+        self.observedData = observedDialogContent
+        if appArguments.textField.present {
+            for i in 0..<observedDialogContent.appProperties.textFields.count {
+                if observedDialogContent.appProperties.textFields[i].required {
+                    observedDialogContent.requiredFieldsPresent = true
                 }
-                //highlight.append(Color.clear)
             }
         }
-        if !observedDialogContent.iconPresent { //} cloptions.hideIcon.present {
-            fieldwidth = appvars.windowWidth
+        if !observedDialogContent.args.hideIcon.present { //} appArguments.hideIcon.present {
+            fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)
         } else {
-            fieldwidth = appvars.windowWidth - appvars.iconWidth
+            fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)
         }
-
     }
-
+    
     var body: some View {
-        if textFieldPresent {
+        if observedData.args.textField.present {
             VStack {
-                ForEach(0..<textFields.count, id: \.self) {index in
-                    Group {
-                        if textFields[index].editor {
-                            VStack {
-                                HStack {
-                                    Text(textFields[index].title + (textFields[index].required ? " *":""))
-                                        .bold()
-                                        .font(.system(size: 15))
-                                        .frame(alignment: .leading)
-                                    Spacer()
+                ForEach(0..<observedData.textEntryArray.count, id: \.self) {index in
+                    HStack {
+                        Spacer()
+                        Text(observedData.textEntryArray[index].title + (observedData.textEntryArray[index].required ? " *":""))
+                            .bold()
+                            .font(.system(size: 15))
+                            .frame(idealWidth: fieldwidth*0.20, maxWidth: 150, alignment: .leading)
+                        Spacer()
+                            .frame(width: 20)
+                        HStack {
+                            if observedData.textEntryArray[index].secure {
+                                ZStack() {
+                                    SecureField("", text: $observedData.textEntryArray[index].value)
+                                        .disableAutocorrection(true)
+                                        .textContentType(.password)
+                                    Image(systemName: "lock.fill")
+                                        .foregroundColor(stringToColour("#008815")).opacity(0.5)
+                                            .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
                                 }
-                                TextEditor(text: $textFieldValue[index])
-                                    .background(Color("editorBackgroundColour"))
-                                    .font(.custom("HelveticaNeue", size: 14))
-                                    .cornerRadius(3.0)
-                                    .frame(height: 80)
-                            }
-                            .padding(.bottom, 10)
-                        } else {
-                            HStack {
-                                //Spacer()
-                                Text(textFields[index].title + (textFields[index].required ? " *":""))
-                                    .bold()
-                                    .font(.system(size: 15))
-                                    .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
-                                Spacer()
-                                    //.frame(width: 20)
-                                if textFields[index].fileSelect {
-                                    Button("button-select".localized)
-                                    {
-                                        let panel = NSOpenPanel()
-                                        panel.allowsMultipleSelection = false
-                                        panel.canChooseDirectories = false
-                                        if textFields[index].fileType != "" {
-                                            panel.allowedFileTypes = [textFields[index].fileType]
-                                        }
-                                        if panel.runModal() == .OK {
-                                            textFieldValue[index] = panel.url?.path ?? "<none>"
-                                        }
-                                    }
-                                }
-                                HStack {
-                                    if textFields[index].secure {
-                                        ZStack() {
-                                            SecureField("", text: $textFieldValue[index])
-                                                .disableAutocorrection(true)
-                                                .textContentType(textFields[index].passwordFill ? .password : .none)
-                                            Image(systemName: "lock.fill")
-                                                .foregroundColor(stringToColour("#008815")).opacity(0.5)
-                                                    .frame(idealWidth: fieldwidth*0.50, maxWidth: 250, alignment: .trailing)
-                                        }
-                                    } else {
-                                        TextField(textFields[index].prompt, text: $textFieldValue[index])
-                                            
-                                    }
-                                }
-                                .frame(idealWidth: fieldwidth*0.50, maxWidth: 250, alignment: .trailing)
-                                
-                                .overlay(RoundedRectangle(cornerRadius: 5)
-                                            .stroke(observedDialogContent.requiredTextfieldHighlight[index], lineWidth: 2)
-                                            .animation(.easeIn(duration: 0.2)
-                                                        .repeatCount(3, autoreverses: true)
-                                                       )
-                                         )
+                            } else {
+                                //if #available(macOS 12.0, *) {
+                                //    TextField("", text: $observedData.appProperties.textFields[index].value, prompt:Text(observedData.appProperties.textFields[index].prompt))
+                                //} else {
+                                    TextField(observedData.textEntryArray[index].prompt, text: $observedData.textEntryArray[index].value)
+                                //}
                             }
                         }
+                        .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
+                        //.onChange(of: observedData.textEntryArray[index].value, perform: { value in
+                            //update appvars with the text that was entered. this will be printed to stdout on exit
+                            //appvars.textFields[index].value = observedData.textEntryArray[index].value
+                        //})
+                        .overlay(RoundedRectangle(cornerRadius: 5)
+                            .stroke(observedData.textEntryArray[index].requiredTextfieldHighlight, lineWidth: 2)
+                                    .animation(.easeIn(duration: 0.2)
+                                                .repeatCount(3, autoreverses: true)
+                                               )
+                                 )
+                        Spacer()
                     }
-                    .onChange(of: textFieldValue[index], perform: { value in
-                        //update appvars with the text that was entered. this will be printed to stdout on exit
-                        textFields[index].value = textFieldValue[index]
-                    })
                 }
-                if requiredFieldsPresent {
+                if observedData.requiredFieldsPresent {
                     HStack {
                         Spacer()
                         Text("required-note")
@@ -140,3 +95,5 @@ struct TextEntryView: View {
         }
     }
 }
+
+

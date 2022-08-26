@@ -12,11 +12,9 @@ import SwiftUI
 struct IconView: View {
     @Environment(\.colorScheme) var colorScheme
     
-    //@ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
-    var messageUserImagePath: String //= cloptions.iconOption.value // CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
-    
-    var iconOverlay : String
+    var messageUserImagePath: String //= appArguments.iconOption.value // CLOptionText(OptionName: appArguments.iconOption, DefaultValue: "default")
     var logoWidth: CGFloat = appvars.iconWidth
     var logoHeight: CGFloat  = appvars.iconHeight
     var imgFromURL: Bool = false
@@ -46,26 +44,21 @@ struct IconView: View {
     let overlayImageScale: CGFloat = 0.4
     
   
-    init(image : String = "", overlay : String = "") {
-        //self.observedDialogContent = observedDialogContent
+    init(observedDialogContent : DialogUpdatableContent) {
+        self.observedData = observedDialogContent
         
-        //if image != "" {
-        messageUserImagePath = image
-        iconOverlay = overlay
-        //} else {
-        //    messageUserImagePath = observedDialogContent.iconImage
-        //}
+        messageUserImagePath = observedDialogContent.args.iconOption.value // observedDialogContent.iconImage
         
         logoWidth = appvars.iconWidth
         logoHeight = appvars.iconHeight
         
-        if overlay != "" {
+        if observedDialogContent.args.overlayIconOption.present {
             mainImageScale = mainImageWithOverlayScale
         }
         
         // fullscreen runs on a dark background so invert the default icon colour for info and default
         // also set the icon offset to 0
-        if cloptions.fullScreenWindow.present {
+        if appArguments.fullScreenWindow.present {
             // fullscreen background is dark, so we want to use white as the default colour
             builtInIconColour = Color.white
         }
@@ -151,16 +144,16 @@ struct IconView: View {
             }
         }
             
-        if cloptions.warningIcon.present || messageUserImagePath == "warning" {
+        if appArguments.warningIcon.present || messageUserImagePath == "warning" {
             builtInIconName = "exclamationmark.octagon.fill"
             builtInIconFill = "octagon.fill" //does not have multicolour sf symbol so we have to make out own using a fill layer
             builtInIconColour = Color.red
             iconRenderingMode = Image.TemplateRenderingMode.original
             builtInIconPresent = true
-        } else if cloptions.cautionIcon.present || messageUserImagePath == "caution" {
+        } else if appArguments.cautionIcon.present || messageUserImagePath == "caution" {
             builtInIconName = "exclamationmark.triangle.fill"  // yay multicolour sf symbol
             builtInIconPresent = true
-        } else if cloptions.infoIcon.present || messageUserImagePath == "info" {
+        } else if appArguments.infoIcon.present || messageUserImagePath == "info" {
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
         } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL) {
@@ -265,7 +258,7 @@ struct IconView: View {
                     .scaleEffect(mainImageScale)
             }
 
-            IconOverlayView(image: iconOverlay)
+            IconOverlayView(observedDialogContent: observedData)
                 .scaleEffect(overlayImageScale, anchor:.bottomTrailing)
 
         }
