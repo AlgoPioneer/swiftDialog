@@ -7,6 +7,15 @@
 
 import SwiftUI
 
+extension NSTableView {
+  open override func viewDidMoveToWindow() {
+    super.viewDidMoveToWindow()
+
+    backgroundColor = NSColor.clear
+    enclosingScrollView!.drawsBackground = false
+  }
+}
+
 struct StatusImage: View {
     
     var name: String
@@ -27,29 +36,6 @@ struct StatusImage: View {
             .frame(width: statusSize, height: statusSize)
             //.border(.red)
             .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
-    }
-}
-
-struct CirclerPercentageProgressViewStyle : ProgressViewStyle {
-    public func makeBody(configuration: LinearProgressViewStyle.Configuration) -> some View {
-        let stroke : CGFloat = 5
-        let padding : CGFloat = stroke / 2
-        VStack() {
-            ZStack {
-                Circle()
-                    .stroke(lineWidth: stroke)
-                    .opacity(0.3)
-                    .foregroundColor(Color.accentColor.opacity(0.5))
-                Circle()
-                    .trim(from: 0.0, to: CGFloat(configuration.fractionCompleted ?? 0))
-                .stroke(style: StrokeStyle(lineWidth: stroke, lineCap: .round, lineJoin: .round))
-                .foregroundColor(Color.accentColor)
-                .rotationEffect(.degrees(-90))
-                //.animation(.linear)
-            }
-            .animation(.linear)
-            .padding(.trailing, padding)
-        }
     }
 }
 
@@ -89,6 +75,10 @@ struct ListView: View {
                         List(0..<observedData.listItemsArray.count, id: \.self) {i in
                             VStack {
                                 HStack {
+                                    if observedData.listItemsArray[i].icon != "" {
+                                        IconView(image: observedData.listItemsArray[i].icon, overlay: "")
+                                            .frame(maxHeight: rowHeight)
+                                    }
                                     Text(observedData.listItemsArray[i].title)
                                         .font(.system(size: rowFontSize))
                                         .id(i)
@@ -131,6 +121,7 @@ struct ListView: View {
                             }
                             //.frame(height: rowHeight+listHeightPadding)
                         }
+                        .background(Color("editorBackgroundColour"))
                     }
                     .onChange(of: observedData.listItemUpdateRow, perform: { _ in
                         DispatchQueue.main.async {
@@ -146,6 +137,28 @@ struct ListView: View {
     }
 }
 
+struct CirclerPercentageProgressViewStyle : ProgressViewStyle {
+    public func makeBody(configuration: LinearProgressViewStyle.Configuration) -> some View {
+        let stroke : CGFloat = 5
+        let padding : CGFloat = stroke / 2
+        VStack() {
+            ZStack {
+                Circle()
+                    .stroke(lineWidth: stroke)
+                    .opacity(0.3)
+                    .foregroundColor(Color.accentColor.opacity(0.5))
+                Circle()
+                    .trim(from: 0.0, to: CGFloat(configuration.fractionCompleted ?? 0))
+                .stroke(style: StrokeStyle(lineWidth: stroke, lineCap: .round, lineJoin: .round))
+                .foregroundColor(Color.accentColor)
+                .rotationEffect(.degrees(-90))
+                //.animation(.linear)
+            }
+            .animation(.linear)
+            .padding(.trailing, padding)
+        }
+    }
+}
 
 public struct CircularProgressViewStyle: ProgressViewStyle {
     var size: CGFloat

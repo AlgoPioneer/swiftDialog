@@ -14,14 +14,14 @@ func processJSON(jsonFilePath: String) -> JSON {
     // read in from file
     let jsonDataPath = NSURL(fileURLWithPath: jsonFilePath)
     var jsonData = Data()
-      
+
     // wrap everything in a try block.IF the URL or filepath is unreadable then bail
     do {
         jsonData = try Data(contentsOf: jsonDataPath as URL)
     } catch {
         quitDialog(exitCode: appvars.exit202.code, exitMessage: "\(appvars.exit202.message) \(jsonFilePath)")
     }
-    
+
     do {
         json = try JSON(data: jsonData)
     } catch {
@@ -56,9 +56,9 @@ func getJSON() -> JSON {
 }
 
 func processCLOptions() {
-    
+
     //this method goes through the arguments that are present and performs any processing required before use
-    
+
     let json : JSON = getJSON()
     
     if appArguments.dropdownValues.present {
@@ -69,17 +69,17 @@ func processCLOptions() {
             let selectDefault = json[appArguments.dropdownDefault.long].stringValue
             appvars.dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
         }
-        
-        if json["selectitems"].exists() {            
+
+        if json["selectitems"].exists() {
             for i in 0..<json["selectitems"].count {
-                
+
                 let selectTitle = json["selectitems"][i]["title"].stringValue
                 let selectValues = (json["selectitems"][i]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) }
                 let selectDefault = json["selectitems"][i]["default"].stringValue
                 
                 appvars.dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
             }
-            
+
         } else {
             let dropdownValues = CLOptionMultiOptions(optionName: appArguments.dropdownValues.long)
             var selectValues = CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long)
@@ -92,7 +92,7 @@ func processCLOptions() {
             for _ in dropdownDefaults.count..<dropdownValues.count {
                 dropdownDefaults.append("")
             }
-            
+
             for i in 0..<(dropdownValues.count) {
                 appvars.dropdownItems.append(DropDownItems(title: selectValues[i], values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i]))
             }
@@ -106,24 +106,32 @@ func processCLOptions() {
                     appvars.textFields.append(TextFieldState(title: String(json[appArguments.textField.long][i].stringValue)))
                 } else {
                     appvars.textFields.append(TextFieldState(
-                        title: String(json[appArguments.textField.long][i]["title"].stringValue),
-                        required: Bool(json[appArguments.textField.long][i]["required"].boolValue),
-                        secure: Bool(json[appArguments.textField.long][i]["secure"].boolValue),
+                        editor: Bool(json[appArguments.textField.long][i]["editor"].boolValue),
+                        fileSelect: Bool(json[appArguments.textField.long][i]["fileselect"].boolValue),
+                        fileType: String(json[appArguments.textField.long][i]["filetype"].stringValue),
+                        passwordFill: Bool(json[appArguments.textField.long][i]["passwordfill"].boolValue),
                         prompt: String(json[appArguments.textField.long][i]["prompt"].stringValue),
                         regex: String(json[appArguments.textField.long][i]["regex"].stringValue),
-                        regexError: String(json[appArguments.textField.long][i]["regexerror"].stringValue))
+                        regexError: String(json[appArguments.textField.long][i]["regexerror"].stringValue),
+                        required: Bool(json[appArguments.textField.long][i]["required"].boolValue),
+                        secure: Bool(json[appArguments.textField.long][i]["secure"].boolValue),
+                        title: String(json[appArguments.textField.long][i]["title"].stringValue))
                     )
                 }
             }
         } else {
             for textFieldOption in CLOptionMultiOptions(optionName: appArguments.textField.long) {
                 let items = textFieldOption.split(usingRegex: appvars.argRegex)
-                var fieldTitle : String = ""
+                var fieldEditor : Bool = false
+                var fieldFileSelect : Bool = false
+                var fieldPasswordFill : Bool = false
                 var fieldPrompt : String = ""
                 var fieldRegex : String = ""
                 var fieldRegexErrror : String = ""
-                var fieldSecure : Bool = false
                 var fieldRequire : Bool = false
+                var fieldSecure : Bool = false
+                var fieldSelectType : String = ""
+                var fieldTitle : String = ""
                 if items.count > 0 {
                     fieldTitle = items[0]
                     if items.count > 1 {
@@ -133,22 +141,39 @@ func processCLOptions() {
                                 .replacingOccurrences(of: ",", with: "")
                                 .replacingOccurrences(of: "=", with: "")
                                 .trimmingCharacters(in: .whitespaces) {
-                            case "secure":
-                                fieldSecure = true
-                            case "required":
-                                fieldRequire = true
+                            case "editor":
+                                fieldEditor = true
+                            case "fileselect":
+                                fieldFileSelect = true
+                            case "filetype":
+                                fieldSelectType = items[index+1]
+                            case "passwordfill":
+                                fieldPasswordFill = true
                             case "prompt":
                                 fieldPrompt = items[index+1]
                             case "regex":
                                 fieldRegex = items[index+1]
                             case "regexerror":
                                 fieldRegexErrror = items[index+1]
+                            case "required":
+                                fieldRequire = true
+                            case "secure":
+                                fieldSecure = true
                             default: ()
                             }
                         }
                     }
                 }
-                appvars.textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, prompt: fieldPrompt, regex: fieldRegex, regexError: fieldRegexErrror))
+                appvars.textFields.append(TextFieldState(editor: fieldEditor,
+                                                 fileSelect: fieldFileSelect,
+                                                 fileType: fieldSelectType,
+                                                 passwordFill: fieldPasswordFill,
+                                                 prompt: fieldPrompt,
+                                                 regex: fieldRegex,
+                                                 regexError: fieldRegexErrror,
+                                                 required: fieldRequire,
+                                                 secure: fieldSecure,
+                                                 title: fieldTitle))
             }
         }
         logger(logMessage: "textOptionsArray : \(appvars.textFields)")
@@ -209,7 +234,7 @@ func processCLOptions() {
                                 )
                 }
             }
-            
+
         } else {
             
             for listItem in CLOptionMultiOptions(optionName: appArguments.listItem.long) {
@@ -243,7 +268,21 @@ func processCLOptions() {
         appArguments.autoPlay.value = "0"
         logger(logMessage: "autoPlay.value : \(appArguments.autoPlay.value)")
     }
-    
+
+    if json[appArguments.mainImageCaption.long].exists() || appArguments.mainImageCaption.present {
+        if json[appArguments.mainImageCaption.long].exists() {
+            appvars.imageCaptionArray.append(json[appArguments.mainImageCaption.long].stringValue)
+        } else {
+            appvars.imageCaptionArray = CLOptionMultiOptions(optionName: appArguments.mainImageCaption.long)
+        }
+        logger(logMessage: "imageCaptionArray : \(appvars.imageCaptionArray)")
+    }
+
+    if !json[appArguments.autoPlay.long].exists() && !appArguments.autoPlay.present {
+        appArguments.autoPlay.value = "0"
+        logger(logMessage: "autoPlay.value : \(appArguments.autoPlay.value)")
+    }
+
     // process command line options that just display info and exit before we show the main window
     if (appArguments.helpOption.present || CommandLine.arguments.count == 1) {
         print(helpText)
@@ -277,7 +316,7 @@ func processCLOptions() {
         for familyname in fontfamilies.enumerated() {
             print("  \(familyname.element)")
         }
-        
+
         // All font names
         let fonts = NSFontManager.shared.availableFonts
         print("Available font names:")
@@ -286,7 +325,7 @@ func processCLOptions() {
         }
         quitDialog(exitCode: appvars.exit0.code)
     }
-    
+
     //check for DND and exit if it's on
     if isDNDEnabled() && !appvars.willDisturb {
         quitDialog(exitCode: 20, exitMessage: "Do Not Disturb is enabled. Exiting")
@@ -327,12 +366,12 @@ func processCLOptions() {
     let app = NSApplication.shared
     //app.setActivationPolicy(.regular)
     app.setActivationPolicy(.accessory)
-            
+
     if appArguments.titleFont.present {
-        
+
         if appArguments.titleFont.value == "" {
             logger(logMessage: "titleFont.object : \(json[appArguments.titleFont.long].object)")
-            
+
             appvars.titleFontSize = string2float(string: json[appArguments.titleFont.long]["size"].stringValue, defaultValue: appvars.titleFontSize)
             appvars.titleFontWeight = textToFontWeight(json[appArguments.titleFont.long]["weight"].stringValue)
             if json[appArguments.messageFont.long]["colour"].exists() {
@@ -368,7 +407,7 @@ func processCLOptions() {
                     appvars.titleFontName = item[1]
                     logger(logMessage: "titleFontName : \(appvars.titleFontName)")
                 }
-                
+
             }
         }
     }
@@ -426,13 +465,22 @@ func processCLOptions() {
         appArguments.iconOption.present = false
         //appArguments.hideIcon.present = true
     }
-    
+
     // of both banner image and icon are specified, re-enable the icon.
     if appArguments.bannerImage.present && appArguments.iconOption.present {
         //appArguments.hideIcon.present = false
         appArguments.iconOption.present = true
     }
         
+    if appArguments.bannerImage.present && appArguments.iconOption.present {
+        appvars.iconIsHidden = false
+    }
+
+    if appArguments.centreIcon.present {
+        appvars.iconIsCentred = true
+        logger(logMessage: "iconIsCentred = true")
+    }
+
     if appArguments.movableWindow.present {
         appvars.windowIsMoveable = true
         logger(logMessage: "windowIsMoveable = true")
@@ -447,7 +495,7 @@ func processCLOptions() {
         appvars.jsonOut = true
         logger(logMessage: "jsonOut = true")
     }
-    
+
     // we define this stuff here as we will use the info to draw the window.
     if appArguments.smallWindow.present {
         // scale everything down a notch
@@ -463,7 +511,7 @@ func processCLOptions() {
         appvars.scaleFactor = 1.25
         logger(logMessage: "bigWindow.present")
     }
-    
+
     //if info button is present but no button action then default to quit on info
     if !appArguments.buttonInfoActionOption.present {
         appArguments.quitOnInfo.present = true
@@ -474,7 +522,7 @@ func processCLOptionValues() {
     
     // this method reads in arguments from either json file or from the command line and loads them into the appArguments object
     // also records whether an argument is present or not
-    
+
     let json : JSON = getJSON()
     
     appArguments.titleOption.value             = json[appArguments.titleOption.long].string ?? CLOptionText(OptionName: appArguments.titleOption, DefaultValue: appvars.titleDefault)
@@ -498,7 +546,7 @@ func processCLOptionValues() {
             appvars.messageAlignment = .leading
         }
     }
-    
+
     // window location on screen
     if CLOptionPresent(OptionName: appArguments.position) {
         switch CLOptionText(OptionName: appArguments.position) {
@@ -684,7 +732,7 @@ func processCLOptionValues() {
             }
         }
     }
-    
+
     // anthing that is an option only with no value
     appArguments.button2Option.present         = json[appArguments.button2Option.long].boolValue || CLOptionPresent(OptionName: appArguments.button2Option)
     appArguments.infoButtonOption.present      = json[appArguments.infoButtonOption.long].boolValue || CLOptionPresent(OptionName: appArguments.infoButtonOption)
@@ -704,6 +752,7 @@ func processCLOptionValues() {
     appArguments.quitOnInfo.present            = json[appArguments.quitOnInfo.long].boolValue || CLOptionPresent(OptionName: appArguments.quitOnInfo)
     appArguments.blurScreen.present            = json[appArguments.blurScreen.long].boolValue || CLOptionPresent(OptionName: appArguments.blurScreen)
     appArguments.constructionKit.present       = json[appArguments.constructionKit.long].boolValue || CLOptionPresent(OptionName: appArguments.constructionKit)
+    appArguments.miniMode.present              = json[appArguments.miniMode.long].boolValue || CLOptionPresent(OptionName: appArguments.miniMode)
     
     // command line only options
     appArguments.listFonts.present             = CLOptionPresent(OptionName: appArguments.listFonts)
