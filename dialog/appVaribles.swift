@@ -107,7 +107,7 @@ struct CLArgument {
 
 struct AppVariables {
     
-    var cliversion                      = "2.0.1"
+    var cliversion                      = "2.0.2"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
@@ -169,6 +169,7 @@ struct AppVariables {
     var titleFontColour                 = Color.primary
     var titleFontWeight                 = Font.Weight.bold
     var titleFontName                   = ""
+    var titleFontShadow                 = Bool(false)
     var messageFontSize                 = CGFloat(20)
     var messageFontColour               = Color.primary
     var messageFontWeight               = Font.Weight.regular
@@ -238,9 +239,11 @@ struct CommandLineArguments {
     var messageVerticalAlignment = CLArgument(long: "messageposition")
     var iconOption               = CLArgument(long: "icon", short: "i")
     var iconSize                 = CLArgument(long: "iconsize")
+    var iconAccessabilityLabel   = CLArgument(long: "iconalttext")
   //var iconHeight               = CLArgument(long: "iconheight")
     var overlayIconOption        = CLArgument(long: "overlayicon", short: "y")
     var bannerImage              = CLArgument(long: "bannerimage", short: "n")
+    var bannerTitle              = CLArgument(long: "bannertitle")
     var button1TextOption        = CLArgument(long: "button1text")
     var button1ActionOption      = CLArgument(long: "button1action")
     var button1ShellActionOption = CLArgument(long: "button1shellaction",short: "")
