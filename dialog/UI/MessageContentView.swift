@@ -60,9 +60,6 @@ struct MessageContent: View {
                 }
                 ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: string2float(string: observedData.args.autoPlay.value))
             } else {
-                if ["bottom"].contains(observedData.args.messageVerticalAlignment.value) {
-                    Spacer()
-                }
                 if observedData.args.centreIcon.present && observedData.args.iconOption.present {
                     IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                         .frame(width: iconDisplayWidth, alignment: .top)
@@ -71,8 +68,8 @@ struct MessageContent: View {
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
                 }
-                if !["", "none"].contains(observedData.args.messageOption.value) {
-                    if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
+                if observedData.args.messageOption.value != "" && observedData.args.messageOption.value != "none" {
+                    if observedData.args.messageVerticalAlignment.present {
                         Spacer()
                     }
                     if observedData.args.webcontent.present || observedData.args.listItem.present || observedData.args.messageVerticalAlignment.present {
@@ -92,36 +89,37 @@ struct MessageContent: View {
                                 .focusable(false)
                         }
                     }
-                    if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
-                        Spacer()
-                    }
+                    Spacer()
                 }
                 
                 WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
+                    //.padding(.trailing, 30)
                     .padding(.bottom, observedData.appProperties.bottomPadding)
 
                 ListView(observedDialogContent: observedData)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
+                    //.padding(.trailing, 30)
                     .padding(.bottom, observedData.appProperties.bottomPadding)
-                
                 CheckboxView(observedDialogContent: observedData)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
-                    //.padding(.bottom, observedData.appProperties.bottomPadding)
-                    //.frame(maxWidth: 600)
+                    //.padding(.trailing, 30)
                 
+                    .padding(.bottom, observedData.appProperties.bottomPadding)
+                    .frame(maxWidth: 600)
                 TextEntryView(observedDialogContent: observedData)
+                    //.padding(.leading, 50)
+                    //.padding(.trailing, 30)
                     .padding(.bottom, observedData.appProperties.bottomPadding)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                     .frame(maxWidth: 600)
-                
                 DropdownView(observedDialogContent: observedData)
+                    //.padding(.leading, 50)
+                    //.padding(.trailing, 30)
                     .padding(.bottom, observedData.appProperties.bottomPadding)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                     .frame(maxWidth: 600)
-                if ["top"].contains(observedData.args.messageVerticalAlignment.value) {
-                    Spacer()
-                }
+
             }
         }
         .padding(.leading, observedData.appProperties.sidePadding)

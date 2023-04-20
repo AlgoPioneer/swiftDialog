@@ -26,7 +26,7 @@ struct BannerImageView: View {
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
         
-        bannerImage = getImageFromPath(fileImagePath: observedDialogContent.args.bannerImage.value, returnErrorImage: true, errorImageName: "banner")
+        bannerImage = getImageFromPath(fileImagePath: observedDialogContent.args.bannerImage.value)
         bannerWidth = observedDialogContent.windowWidth // appvars.windowWidth
         bannerHeight = bannerImage.size.height*(bannerWidth / bannerImage.size.width)
         if bannerHeight > maxBannerHeight {
