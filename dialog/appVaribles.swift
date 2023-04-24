@@ -58,11 +58,14 @@ struct DropDownItems {
     var values          : [String]
     var defaultValue    : String
     var selectedValue   : String = ""
+    var required        : Bool   = false
+    var requiredfieldHighlight : Color = .clear
 }
 
 struct CheckBoxes {
-    var title           : String
-    var value           : Bool = false
+    var label           : String
+    var icon            : String = ""
+    var checked         : Bool = false
     var disabled        : Bool = false
 }
 
@@ -100,7 +103,9 @@ struct CLArgument {
     var long: String
     var short: String = ""
     var value : String = ""
-    var help : String = ""
+    var helpShort : String = ""
+    var helpLong : String = ""
+    var helpUsage : String = "<text>"
     var present : Bool = false
     var isbool : Bool = false
 }
@@ -188,11 +193,10 @@ struct AppVariables {
     var jsonOut                         = Bool(false)
 
     var willDisturb                     = Bool(false)
-
-    var checkboxOptionsArray            = [String]()
-    var checkboxText                    = Array(repeating: "", count: 64)
-    var checkboxValue                   = Array(repeating: false, count: 64)
-    var checkboxDisabled                = Array(repeating: false, count: 64)
+    
+    var checkboxArray                   = [CheckBoxes]()
+    var checkboxControlSize             = ControlSize.mini
+    var checkboxControlStyle            = ""
 
     var imageArray                      = [MainImage]()
     var imageCaptionArray               = [String]()
@@ -266,6 +270,7 @@ struct CommandLineArguments {
     var messageFont              = CLArgument(long: "messagefont")
     var textField                = CLArgument(long: "textfield")
     var checkbox                 = CLArgument(long: "checkbox")
+    var checkboxStyle            = CLArgument(long: "checkboxstyle")
     var timerBar                 = CLArgument(long: "timer")
     var progressBar              = CLArgument(long: "progress")
     var progressText             = CLArgument(long: "progresstext")

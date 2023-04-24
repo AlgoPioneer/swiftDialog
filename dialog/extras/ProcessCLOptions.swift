@@ -71,30 +71,39 @@ func processCLOptions(json : JSON = getJSON()) {
         }
 
         if json["selectitems"].exists() {
-            for i in 0..<json["selectitems"].count {
-
-                let selectTitle = json["selectitems"][i]["title"].stringValue
-                let selectValues = (json["selectitems"][i]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) }
-                let selectDefault = json["selectitems"][i]["default"].stringValue
-                
-                appvars.dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
+            for i in 0..<json["selectitems"].count {                
+                appvars.dropdownItems.append(DropDownItems(
+                        title: json["selectitems"][i]["title"].stringValue,
+                        values: (json["selectitems"][i]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) },
+                        defaultValue: json["selectitems"][i]["default"].stringValue,
+                        selectedValue: json["selectitems"][i]["default"].stringValue,
+                        required: json["selectitems"][i]["required"].boolValue
+                ))
             }
 
         } else {
             let dropdownValues = CLOptionMultiOptions(optionName: appArguments.dropdownValues.long)
-            var selectValues = CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long)
+            var dropdownLabels = CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long)
             var dropdownDefaults = CLOptionMultiOptions(optionName: appArguments.dropdownDefault.long)
             
             // need to make sure the title and default value arrays are the same size
-            for _ in selectValues.count..<dropdownValues.count {
-                selectValues.append("")
+            for _ in dropdownLabels.count..<dropdownValues.count {
+                dropdownLabels.append("")
             }
             for _ in dropdownDefaults.count..<dropdownValues.count {
                 dropdownDefaults.append("")
             }
 
             for i in 0..<(dropdownValues.count) {
-                appvars.dropdownItems.append(DropDownItems(title: selectValues[i], values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i]))
+                let labelItems = dropdownLabels[i].components(separatedBy: ",")
+                var dropdownRequired : Bool = false
+                let dropdownTitle : String = labelItems[0]
+                if labelItems.count > 1 {
+                    if labelItems[1] == "required" {
+                        dropdownRequired = true
+                    }
+                }
+                appvars.dropdownItems.append(DropDownItems(title: dropdownTitle, values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i], required: dropdownRequired))
             }
         }
     }
@@ -187,13 +196,68 @@ func processCLOptions(json : JSON = getJSON()) {
     
     if appArguments.checkbox.present {
         if json[appArguments.checkbox.long].exists() {
-            appvars.checkboxOptionsArray = json[appArguments.checkbox.long].arrayValue.map {$0["label"].stringValue}
-            appvars.checkboxValue = json[appArguments.checkbox.long].arrayValue.map {$0["checked"].boolValue}
-            appvars.checkboxDisabled = json[appArguments.checkbox.long].arrayValue.map {$0["disabled"].boolValue}
+            for i in 0..<json[appArguments.checkbox.long].arrayValue.count {
+                let cbLabel = json[appArguments.checkbox.long][i]["label"].stringValue
+                let cbChecked = json[appArguments.checkbox.long][i]["checked"].boolValue
+                let cbDisabled = json[appArguments.checkbox.long][i]["disabled"].boolValue
+                let cbIcon = json[appArguments.checkbox.long][i]["icon"].stringValue
+                
+                appvars.checkboxArray.append(CheckBoxes(label: cbLabel, icon: cbIcon, checked: cbChecked, disabled: cbDisabled))
+            }
         } else {
-            appvars.checkboxOptionsArray =  CLOptionMultiOptions(optionName: appArguments.checkbox.long)
+            for checkboxes in CLOptionMultiOptions(optionName: appArguments.checkbox.long) {
+                let items = checkboxes.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                var label : String = ""
+                var icon : String = ""
+                var checked : Bool = false
+                var disabled : Bool = false
+                for item in items {
+                    var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
+                    for _ in itemKeyValuePair.count...2 {
+                        itemKeyValuePair.append("")
+                    }
+                    let itemName = String(itemKeyValuePair[0])
+                    let itemValue = String(itemKeyValuePair[1])
+                    switch itemName.lowercased() {
+                    case "label":
+                        label = itemValue
+                    case "icon":
+                        icon = itemValue
+                    case "checked":
+                        checked = true
+                    case "disabled":
+                        disabled = true
+                    default:
+                        label = itemName
+                    }
+                }
+                appvars.checkboxArray.append(CheckBoxes(label: label, icon: icon, checked: checked, disabled: disabled))
+            }
         }
-        logger(logMessage: "checkboxOptionsArray : \(appvars.checkboxOptionsArray)")
+        logger(logMessage: "checkboxOptionsArray : \(appvars.checkboxArray)")
+    }
+    
+    if appArguments.checkboxStyle.present {
+        var controlSize = ""
+        if json[appArguments.checkboxStyle.long].exists() {
+            appvars.checkboxControlStyle = json[appArguments.checkboxStyle.long]["style"].stringValue
+            controlSize = json[appArguments.checkboxStyle.long]["size"].stringValue
+        } else {
+            appvars.checkboxControlStyle = appArguments.checkboxStyle.value.components(separatedBy: ",").first ?? "checkbox"
+            controlSize = appArguments.checkboxStyle.value.components(separatedBy: ",").last ?? ""
+        }
+        switch controlSize {
+        case "regular":
+            appvars.checkboxControlSize = .regular
+        case "small":
+            appvars.checkboxControlSize = .small
+        case "large":
+            appvars.checkboxControlSize = .large
+        case "mini":
+            appvars.checkboxControlSize = .mini
+        default:
+            appvars.checkboxControlSize = .mini
+        }
     }
     
     if appArguments.mainImage.present {
@@ -303,7 +367,13 @@ func processCLOptions(json : JSON = getJSON()) {
 
     // process command line options that just display info and exit before we show the main window
     if (appArguments.helpOption.present || CommandLine.arguments.count == 1) {
-        print(helpText)
+        //print(helpText)
+        let sdHelp = swiftDialogHelp(arguments: appArguments)
+        if appArguments.helpOption.value != "" {
+            sdHelp.printHelpLong(for: appArguments.helpOption.value)
+        } else {
+            sdHelp.printHelpShort()
+        }
         quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
     }
@@ -707,6 +777,9 @@ func processCLOptionValues() {
     appArguments.textField.present             = json[appArguments.textField.long].exists() || CLOptionPresent(OptionName: appArguments.textField)
     
     appArguments.checkbox.present             = json[appArguments.checkbox.long].exists() || CLOptionPresent(OptionName: appArguments.checkbox)
+    
+    appArguments.checkboxStyle.present        = json[appArguments.checkboxStyle.long].exists() || CLOptionPresent(OptionName: appArguments.checkboxStyle)
+    appArguments.checkboxStyle.value          = json[appArguments.checkboxStyle.long].string ?? CLOptionText(OptionName: appArguments.checkboxStyle)
 
     appArguments.timerBar.value                = json[appArguments.timerBar.long].string ?? CLOptionText(OptionName: appArguments.timerBar, DefaultValue: "\(appvars.timerDefaultSeconds)")
     appArguments.timerBar.present              = json[appArguments.timerBar.long].exists() || CLOptionPresent(OptionName: appArguments.timerBar)
@@ -819,6 +892,9 @@ func processCLOptionValues() {
             }
         }
     }
+    
+    appArguments.helpOption.present            = CLOptionPresent(OptionName: appArguments.helpOption)
+    appArguments.helpOption.value              = CLOptionText(OptionName: appArguments.helpOption)
 
     // anthing that is an option only with no value
     appArguments.button2Option.present         = json[appArguments.button2Option.long].boolValue || CLOptionPresent(OptionName: appArguments.button2Option)
@@ -844,7 +920,6 @@ func processCLOptionValues() {
     
     // command line only options
     appArguments.listFonts.present             = CLOptionPresent(OptionName: appArguments.listFonts)
-    appArguments.helpOption.present            = CLOptionPresent(OptionName: appArguments.helpOption)
     appArguments.demoOption.present            = CLOptionPresent(OptionName: appArguments.demoOption)
     appArguments.buyCoffee.present             = CLOptionPresent(OptionName: appArguments.buyCoffee)
     appArguments.licence.present           = CLOptionPresent(OptionName: appArguments.licence)

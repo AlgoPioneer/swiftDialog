@@ -11,32 +11,67 @@ struct CheckboxView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     
-    //@State var checkboxValues = appvars.checkboxValue
-    // @State var textFieldValue = ""
-    // var textFieldLabel = CLOptionText(OptionName: appArguments.textField)
-    //let checkboxLabels = appvars.checkboxOptionsArray
-    //let checkboxDisabled = appvars.checkboxDisabled
-    //var checkboxPresent: Bool = appArguments.checkbox.present
+    var toggleStyle : any ToggleStyle = .checkbox
 
+    var rowHeight : CGFloat = 10
+    
+    var iconPresent : Bool = false
+    
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
+        
+        if observedData.appProperties.checkboxControlSize == .large {
+            rowHeight = observedData.appProperties.messageFontSize + 24
+        } else {
+            rowHeight = observedData.appProperties.messageFontSize + 14
+        }
+        
+        iconPresent = observedData.appProperties.checkboxArray.contains { $0.icon != "" }
+        
     }
 
     var body: some View {
         if observedData.args.checkbox.present {
             VStack {
-                ForEach(0..<observedData.appProperties.checkboxOptionsArray.count, id: \.self) {index in
+                ForEach(0..<observedData.appProperties.checkboxArray.count, id: \.self) {index in
                     HStack {
-                        Toggle(observedData.appProperties.checkboxOptionsArray[index], isOn: $observedData.appProperties.checkboxValue[index])
-                            .toggleStyle(.checkbox)
-                            .disabled(observedData.appProperties.checkboxDisabled[index])
-                        // Text(checkboxLabels[i])
-                        Spacer()
+                        if observedData.appProperties.checkboxControlStyle == "switch" {
+                            if iconPresent {
+                                if observedData.appProperties.checkboxArray[index].icon != "" {
+                                    IconView(image: observedData.appProperties.checkboxArray[index].icon, overlay: "")
+                                        .frame(height: rowHeight)
+                                } else {
+                                    IconView(image: "none", overlay: "")
+                                        .frame(height: rowHeight)
+                                }
+                            }
+                            Text(observedData.appProperties.checkboxArray[index].label)
+                                //.frame(minWidth: 120, alignment: .leading)
+                            Spacer()
+                            Toggle("", isOn: $observedData.appProperties.checkboxArray[index].checked)
+                                .toggleStyle(.switch)
+                                .disabled(observedData.appProperties.checkboxArray[index].disabled)
+                                .controlSize(observedData.appProperties.checkboxControlSize)
+                        } else {
+                            Toggle(observedData.appProperties.checkboxArray[index].label, isOn: $observedData.appProperties.checkboxArray[index].checked)
+                                .toggleStyle(.checkbox)
+                                .disabled(observedData.appProperties.checkboxArray[index].disabled)
+                            Spacer()
+                        }
                     }
                     .font(.system(size: 16))
                     .frame(alignment: .center)
+                    .frame(width: .infinity)
+                    
+                    // Horozontal Line
+                    if index < observedData.appProperties.checkboxArray.count-1 {
+                        Divider().opacity(0.5)
+                    }
                 }
             }
+            .padding(10)
+            .background(Color.background.opacity(0.5))
+            .cornerRadius(8)
         }
     }
 }
