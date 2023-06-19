@@ -21,7 +21,6 @@ struct MessageContent: View {
         
     var iconDisplayWidth : CGFloat
     
-    /*
     var markdownStyle: MarkdownStyle {
         if observedData.appProperties.messageFontName == "" {
             return MarkdownStyle(font: .system(size: appvars.messageFontSize, weight: appvars.messageFontWeight), foregroundColor: messageColour)
@@ -29,8 +28,7 @@ struct MessageContent: View {
             return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.messageFontSize), foregroundColor: messageColour)
         }
     }
-    */
-    
+            
     let theAllignment: Alignment = .topLeading
     
     init(observedDialogContent : DialogUpdatableContent) {
@@ -79,24 +77,30 @@ struct MessageContent: View {
                     if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
                         Spacer()
                     }
-
-                    Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                        .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                        .markdownTextStyle() {
-                            FontSize(appvars.messageFontSize)
-                            ForegroundColor(messageColour)
+                    //
+                    VStack {
+                        if observedData.args.webcontent.present || observedData.args.listItem.present || observedData.args.messageVerticalAlignment.present {
+                            Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                                .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                                .markdownStyle(markdownStyle)
+                                .border(observedData.appProperties.debugBorderColour, width: 2)
+                                .accessibilityHint(observedData.args.messageOption.value)
+                                .focusable(false)
+                        } else {
+                            ScrollView() {
+                                Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                                    .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                                    .markdownStyle(markdownStyle)
+                                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                                    .accessibilityHint(observedData.args.messageOption.value)
+                                    .focusable(false)
+                            }
                         }
-                        .markdownTheme(.sdMarkdown)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .accessibilityHint(observedData.args.messageOption.value)
-                        .focusable(false)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .if(!observedData.args.webcontent.present && !observedData.args.listItem.present && !observedData.args.messageVerticalAlignment.present) { view in
-                            view.scrollOnOverflow()
-                        }
-                }
-                if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
-                    Spacer()
+                    }
+                    //
+                    if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
+                        Spacer()
+                    }
                 }
                 
                 Group {
