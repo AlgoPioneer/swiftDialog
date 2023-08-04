@@ -84,9 +84,22 @@ func processCLOptions(json: JSON = getJSON()) {
     appvars.debugMode = appArguments.debug.present
 
     // Check if an auth key is present and verify
-    if !checkAuthorisationKey(key: hashForString(appArguments.authkey.value)) {
+    if !dialogAuthorisationKey().isEmpty {
         writeLog("Auth key is required", logLevel: .debug)
-        quitDialog(exitCode: appvars.exit30.code, exitMessage: appvars.exit30.message)
+        var authKey: String = ""
+        if !appArguments.authkey.value.isEmpty {
+            writeLog("Using key value", logLevel: .debug)
+            authKey = appArguments.authkey.value
+        } else if let environmentAuthKey = ProcessInfo.processInfo.environment["DIALOG_AUTH_KEY"] {
+            writeLog("Using environment key value", logLevel: .debug)
+            authKey = environmentAuthKey
+        }
+        if !checkAuthorisationKey(key: hashForString(authKey)) {
+            writeLog("Auth key is required", logLevel: .debug)
+            quitDialog(exitCode: appvars.exit30.code, exitMessage: appvars.exit30.message)
+        } else {
+            appvars.authorised = true
+        }
     }
 
     // hash a key value
@@ -753,38 +766,7 @@ func processCLOptionValues() {
     // window location on screen
     if appArguments.position.present {
         writeLog("Window position will be set to \(appArguments.position.value)")
-        switch appArguments.position.value {
-        case "topleft":
-            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
-            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
-        case "topright":
-            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
-            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
-        case "bottomleft":
-            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
-            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
-        case "bottomright":
-            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
-            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
-        case "left":
-            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
-            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
-        case "right":
-            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
-            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
-        case "top":
-            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
-            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
-        case "bottom":
-            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
-            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
-        case "centre","center":
-            appvars.windowPositionVertical = NSWindow.Position.Vertical.deadcenter
-            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
-        default:
-            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
-            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
-        }
+        (appvars.windowPositionVertical,appvars.windowPositionHorozontal) = windowPosition(appArguments.position.value)
     }
 
     appArguments.iconOption.value              = json[appArguments.iconOption.long].string ?? CLOptionText(optionName: appArguments.iconOption, defaultValue: "default")
