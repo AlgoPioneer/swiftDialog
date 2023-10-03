@@ -66,8 +66,6 @@ func stringToColour(_ colourValue: String) -> Color {
     } else {
         switch colourValue {
 
-        case "accent":
-            returnColor = Color.accentColor
         case "black":
             returnColor = Color.black
         case "blue":

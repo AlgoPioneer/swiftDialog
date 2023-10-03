@@ -20,7 +20,6 @@ struct IconView: View {
     var imgFromBase64: Bool = false
 
     var builtInIconName: String = ""
-    var builtInIconAutoColor: Bool = false
     var builtInIconColour: Color = Color.primary
     var builtInIconSecondaryColour: Color = Color.secondary
     var builtInIconTertiaryColour: Color = Color.primary
@@ -144,7 +143,7 @@ struct IconView: View {
                             // this is a bit of a workaround in that we let the user determine if they want the multicolour SF symbol
                             // or a standard template style. sefault is template. "auto" will use the built in SF Symbol colours
                             iconRenderingMode = Image.TemplateRenderingMode.original
-                            builtInIconAutoColor = true
+                            //builtInIconColour =
                         } else {
                             //check to see if it's in the right length and only contains the right characters
                             iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
@@ -243,7 +242,7 @@ struct IconView: View {
                                 .resizable()
                                 .renderingMode(iconRenderingMode)
                                 .font(Font.title.weight(builtInIconWeight))
-                                .symbolRenderingMode(builtInIconAutoColor ? .multicolor : .hierarchical)
+                                .symbolRenderingMode(.hierarchical)
                                 .foregroundStyle(builtInIconColour)
                         }
                     }
