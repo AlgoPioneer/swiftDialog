@@ -72,7 +72,7 @@ struct IconView: View {
                     SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) }
                     for value in SFValues where value.hasPrefix("bgcolo") {
                         if let bgColour = value.components(separatedBy: "=").last {
-                            sfBackgroundIconColour = Color(argument: bgColour)
+                            sfBackgroundIconColour = stringToColour(bgColour)
                         }
                     }
                     overlayImageBackground = true
@@ -138,7 +138,7 @@ struct IconView: View {
                     case "sf":
                         builtInIconName = SFArgValue
                     case "weight":
-                            builtInIconWeight = Font.Weight(argument: SFArgValue)
+                        builtInIconWeight = textToFontWeight(SFArgValue)
                     case _ where SFArg.hasPrefix("colo"):
                         if SFArgValue == "auto" {
                             // detecting sf symbol properties seems to be annoying, at least in swiftui 2
@@ -151,11 +151,11 @@ struct IconView: View {
                             iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
                             if SFArg.hasSuffix("2") {
                                 sfGradientPresent = true
-                                builtInIconSecondaryColour = Color(argument: SFArgValue)
+                                builtInIconSecondaryColour = stringToColour(SFArgValue)
                             } else if SFArg.hasSuffix("3") {
-                                builtInIconTertiaryColour = Color(argument: SFArgValue)
+                                builtInIconTertiaryColour = stringToColour(SFArgValue)
                             } else {
-                                builtInIconColour = Color(argument: SFArgValue)
+                                builtInIconColour = stringToColour(SFArgValue)
                             }
                         }
                     case "palette":
@@ -166,11 +166,11 @@ struct IconView: View {
                         for index in 0...paletteColours.count-1 {
                             switch index {
                             case 0:
-                                builtInIconColour = Color(argument: paletteColours[index])
+                                builtInIconColour = stringToColour(paletteColours[index])
                             case 1:
-                                builtInIconSecondaryColour = Color(argument: paletteColours[index])
+                                builtInIconSecondaryColour = stringToColour(paletteColours[index])
                             case 2:
-                                builtInIconTertiaryColour = Color(argument: paletteColours[index])
+                                builtInIconTertiaryColour = stringToColour(paletteColours[index])
                             default: ()
                             }
                         }
@@ -243,6 +243,9 @@ struct IconView: View {
                                 .symbolRenderingMode(.monochrome)
                                 .symbolAnimation(effect: sfSymbolAnimation)
                                 .foregroundColor(builtInIconColour)
+                        } else if messageUserImagePath == "computer" {
+                            Image(nsImage: NSImage(named: NSImage.computerName) ?? NSImage())
+                                    .resizable()
                         } else {
                             Image(systemName: builtInIconName)
                                 .resizable()
