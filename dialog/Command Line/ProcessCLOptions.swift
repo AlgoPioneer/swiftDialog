@@ -94,7 +94,7 @@ func processCLOptions(json: JSON = getJSON()) {
             writeLog("Using environment key value", logLevel: .debug)
             authKey = environmentAuthKey
         }
-        if !checkAuthorisationKey(key: hashForString(authKey)) {
+        if !checkAuthorisationKey(key: authKey.sha256Hash) {
             writeLog("Auth key is required", logLevel: .debug)
             quitDialog(exitCode: appvars.exit30.code, exitMessage: appvars.exit30.message)
         } else {
@@ -104,7 +104,7 @@ func processCLOptions(json: JSON = getJSON()) {
 
     // hash a key value
     if appArguments.hash.present {
-        quitDialog(exitCode: 0, exitMessage: hashForString(appArguments.hash.value))
+        quitDialog(exitCode: 0, exitMessage: appArguments.hash.value.sha256Hash)
     }
 
     // Do some basic tag to markdown stuff
@@ -515,30 +515,28 @@ func processCLOptions(json: JSON = getJSON()) {
 
     if appArguments.windowWidth.present {
         writeLog("\(appArguments.windowWidth.long) present")
-        //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: appArguments.windowWidth)
         if appArguments.windowWidth.value.last == "%" {
-            appvars.windowWidth = appvars.screenWidth * string2float(string: String(appArguments.windowWidth.value.dropLast()))/100
+            appvars.windowWidth = appvars.screenWidth * appArguments.windowWidth.value.replacingOccurrences(of: "%", with: "").floatValue()/100
         } else {
-            appvars.windowWidth = string2float(string: appArguments.windowWidth.value)
+            appvars.windowWidth = appArguments.windowWidth.value.floatValue()
         }
-                                writeLog("windowWidth : \(appvars.windowWidth)")
+        writeLog("windowWidth : \(appvars.windowWidth)")
     }
     if appArguments.windowHeight.present {
         writeLog("\(appArguments.windowHeight.long) present")
-        //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: appArguments.windowHeight)
         if appArguments.windowHeight.value.last == "%" {
-            appvars.windowHeight = appvars.screenHeight * string2float(string: String(appArguments.windowHeight.value.dropLast()))/100
+            appvars.windowHeight = appvars.screenHeight * appArguments.windowHeight.value.replacingOccurrences(of: "%", with: "").floatValue()/100
         } else {
-            appvars.windowHeight = string2float(string: appArguments.windowHeight.value)
+            appvars.windowHeight = appArguments.windowHeight.value.floatValue()
         }
-                                writeLog("windowHeight : \(appvars.windowHeight)")
+        writeLog("windowHeight : \(appvars.windowHeight)")
     }
 
     if appArguments.iconSize.present {
         writeLog("\(appArguments.iconSize.long) present")
         //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: appArguments.windowWidth)
-        appvars.iconWidth = string2float(string: appArguments.iconSize.value)
-                                writeLog("iconWidth : \(appvars.iconWidth)")
+        appvars.iconWidth = appArguments.iconSize.value.floatValue()
+        writeLog("iconWidth : \(appvars.iconWidth)")
     }
     // Correct feng shui so the app accepts keyboard input
     // from https://stackoverflow.com/questions/58872398/what-is-the-minimally-viable-gui-for-command-line-swift-scripts
@@ -557,16 +555,16 @@ func processCLOptions(json: JSON = getJSON()) {
                                     writeLog("titleFont.object : \(json[appArguments.titleFont.long].object)")
 
             if json[appArguments.titleFont.long]["size"].exists() {
-                appvars.titleFontSize = string2float(string: json[appArguments.titleFont.long]["size"].stringValue, defaultValue: appvars.titleFontSize)
+                appvars.titleFontSize = json[appArguments.titleFont.long]["size"].number as! CGFloat
             }
             if json[appArguments.titleFont.long]["weight"].exists() {
-                appvars.titleFontWeight = textToFontWeight(json[appArguments.titleFont.long]["weight"].stringValue)
+                appvars.titleFontWeight = Font.Weight(argument: json[appArguments.titleFont.long]["weight"].stringValue)
             }
             if json[appArguments.titleFont.long]["colour"].exists() {
-                appvars.titleFontColour = stringToColour(json[appArguments.titleFont.long]["colour"].stringValue)
+                appvars.titleFontColour = Color(argument: json[appArguments.titleFont.long]["colour"].stringValue)
                 writeLog("found a colour of \(json[appArguments.titleFont.long]["colour"].stringValue)", logLevel: .debug)
             } else if json[appArguments.titleFont.long]["color"].exists() {
-                appvars.titleFontColour = stringToColour(json[appArguments.titleFont.long]["color"].stringValue)
+                appvars.titleFontColour = Color(argument: json[appArguments.titleFont.long]["color"].stringValue)
             }
             if json[appArguments.titleFont.long]["name"].exists() {
                 appvars.titleFontName = json[appArguments.titleFont.long]["name"].stringValue
@@ -583,22 +581,22 @@ func processCLOptions(json: JSON = getJSON()) {
                 let item = value.components(separatedBy: "=")
                 switch item[0] {
                     case  "size":
-                        appvars.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
-                                                writeLog("titleFontSize : \(appvars.titleFontSize)")
+                        appvars.titleFontSize = item[1].floatValue(defaultValue: appvars.titleFontSize)
+                        writeLog("titleFontSize : \(appvars.titleFontSize)")
                     case  "weight":
-                        appvars.titleFontWeight = textToFontWeight(item[1])
-                                                writeLog("titleFontWeight : \(appvars.titleFontWeight)")
+                        appvars.titleFontWeight = Font.Weight(argument: item[1])
+                        writeLog("titleFontWeight : \(appvars.titleFontWeight)")
                     case  "colour","color":
-                        appvars.titleFontColour = stringToColour(item[1])
-                                                writeLog("titleFontColour : \(appvars.titleFontColour)")
+                        appvars.titleFontColour = Color(argument: item[1])
+                        writeLog("titleFontColour : \(appvars.titleFontColour)")
                     case  "name":
                         appvars.titleFontName = item[1]
-                                                writeLog("titleFontName : \(appvars.titleFontName)")
+                        writeLog("titleFontName : \(appvars.titleFontName)")
                     case  "shadow":
                         appvars.titleFontShadow = item[1].boolValue
-                                                writeLog("titleFontShadow : \(appvars.titleFontShadow)")
+                        writeLog("titleFontShadow : \(appvars.titleFontShadow)")
                     default:
-                                                writeLog("Unknown paramater \(item[0])")
+                        writeLog("Unknown paramater \(item[0])")
                 }
 
             }
@@ -612,15 +610,15 @@ func processCLOptions(json: JSON = getJSON()) {
         if appArguments.messageFont.value == "" {
                                     writeLog("messageFont.object : \(json[appArguments.messageFont.long].object)")
             if json[appArguments.messageFont.long]["size"].exists() {
-                appvars.messageFontSize = string2float(string: json[appArguments.messageFont.long]["size"].stringValue, defaultValue: appvars.messageFontSize)
+                appvars.messageFontSize = json[appArguments.messageFont.long]["size"].number as! CGFloat
             }
             if json[appArguments.messageFont.long]["weight"].exists() {
-                appvars.messageFontWeight = textToFontWeight(json[appArguments.messageFont.long]["weight"].stringValue)
+                appvars.messageFontWeight = Font.Weight(argument: json[appArguments.messageFont.long]["weight"].stringValue)
             }
             if json[appArguments.messageFont.long]["colour"].exists() {
-                appvars.messageFontColour = stringToColour(json[appArguments.messageFont.long]["colour"].stringValue)
+                appvars.messageFontColour = Color(argument: json[appArguments.messageFont.long]["colour"].stringValue)
             } else if json[appArguments.messageFont.long]["color"].exists() {
-                appvars.messageFontColour = stringToColour(json[appArguments.messageFont.long]["color"].stringValue)
+                appvars.messageFontColour = Color(argument: json[appArguments.messageFont.long]["color"].stringValue)
             }
             if json[appArguments.messageFont.long]["name"].exists() {
                 appvars.messageFontName = json[appArguments.messageFont.long]["name"].stringValue
@@ -638,19 +636,19 @@ func processCLOptions(json: JSON = getJSON()) {
                 let item = value.components(separatedBy: "=")
                 switch item[0] {
                     case "size":
-                        appvars.messageFontSize = string2float(string: item[1], defaultValue: appvars.messageFontSize)
-                                                writeLog("messageFontSize : \(appvars.messageFontSize)")
+                        appvars.messageFontSize = item[1].floatValue(defaultValue: appvars.messageFontSize)
+                        writeLog("messageFontSize : \(appvars.messageFontSize)")
                     case "weight":
-                        appvars.messageFontWeight = textToFontWeight(item[1])
-                                                writeLog("messageFontWeight : \(appvars.messageFontWeight)")
+                        appvars.messageFontWeight = Font.Weight(argument: item[1])
+                        writeLog("messageFontWeight : \(appvars.messageFontWeight)")
                     case "colour","color":
-                        appvars.messageFontColour = stringToColour(item[1])
-                                                writeLog("messageFontColour : \(appvars.messageFontColour)")
+                        appvars.messageFontColour = Color(argument: item[1])
+                        writeLog("messageFontColour : \(appvars.messageFontColour)")
                     case "name":
                         appvars.messageFontName = item[1]
-                                                writeLog("messageFontName : \(appvars.messageFontName)")
+                        writeLog("messageFontName : \(appvars.messageFontName)")
                     default:
-                                                writeLog("Unknown paramater \(item[0])")
+                        writeLog("Unknown paramater \(item[0])")
                 }
             }
         }
